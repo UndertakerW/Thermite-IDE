@@ -34,12 +34,12 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     highlightCurrentLine();
 
     //Set colors by RGB
-    lineColor.setRgb(56,60,69);
-    editorColor.setRgb(34,39,49);
+    lineColor.setRgb(248, 248, 255);
+    editorColor.setRgb(248, 248, 255);
     QPalette p = this->palette();
     p.setColor(QPalette::Active, QPalette::Base, editorColor);
     p.setColor(QPalette::Inactive, QPalette::Base, editorColor);
-    p.setColor(QPalette::Text,Qt::white);
+    p.setColor(QPalette::Text,Qt::black);
     this->setPalette(p);
 
     //Initialize the keyword list
@@ -72,11 +72,11 @@ int CodeEditor::lineNumberAreaWidth(){
         digit++;
     }
 
-    //Minimum width: 2 digits
-    if(digit <= 2) digit = 2;
+    //Minimum width: 4 digits
+    //if(digit <= 2) digit = 2;
 
     //The space to reserve
-    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digit;
+    int space = fontMetrics().width(QLatin1Char('9')) * (digit + 2);
 
     return space;
 }
@@ -141,9 +141,10 @@ void CodeEditor::highlightCurrentLine(){
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(Qt::red).lighter(160);
+        QColor highlightColor = QColor();
+        highlightColor.setRgb(248, 248, 255);
 
-        selection.format.setBackground(lineColor);
+        selection.format.setBackground(highlightColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();

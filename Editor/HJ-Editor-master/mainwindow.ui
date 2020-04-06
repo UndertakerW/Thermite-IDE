@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
-    <height>508</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>HJ Editor</string>
+   <string>Project Thermite</string>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="CodeEditor" name="editor">
@@ -19,8 +22,8 @@
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>611</width>
-      <height>331</height>
+      <width>1251</width>
+      <height>561</height>
      </rect>
     </property>
    </widget>
@@ -28,8 +31,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>340</y>
-      <width>611</width>
+      <y>570</y>
+      <width>1251</width>
       <height>81</height>
      </rect>
     </property>
@@ -40,13 +43,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>630</width>
+     <width>1280</width>
      <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>文件</string>
+     <string>File</string>
     </property>
     <addaction name="actionNewFile"/>
     <addaction name="actionOpen"/>
@@ -54,7 +57,7 @@
    </widget>
    <widget class="QMenu" name="menuEdit_O">
     <property name="title">
-     <string>编辑</string>
+     <string>Edit</string>
     </property>
     <addaction name="actionSelectAll"/>
     <addaction name="actionUndo"/>
@@ -62,7 +65,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp_H">
     <property name="title">
-     <string>帮助</string>
+     <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionDocument"/>
@@ -72,10 +75,21 @@
    <addaction name="menuHelp_H"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Adobe 黑体 Std R</family>
+    </font>
+   </property>
    <property name="iconSize">
     <size>
-     <width>24</width>
-     <height>24</height>
+     <width>50</width>
+     <height>50</height>
     </size>
    </property>
    <property name="toolButtonStyle">
@@ -92,8 +106,8 @@
    <addaction name="actionSave_File"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
-   <addaction name="actionRun"/>
    <addaction name="actionSetting"/>
+   <addaction name="actionRun"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNewFile">
@@ -102,10 +116,10 @@
      <normaloff>:/image/New.png</normaloff>:/image/New.png</iconset>
    </property>
    <property name="text">
-    <string>新建</string>
+    <string>New</string>
    </property>
    <property name="toolTip">
-    <string>新建一个C++代码文件</string>
+    <string>Create a C++ code file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -117,10 +131,10 @@
      <normaloff>:/image/Open.png</normaloff>:/image/Open.png</iconset>
    </property>
    <property name="text">
-    <string>打开...</string>
+    <string>Open</string>
    </property>
    <property name="toolTip">
-    <string>打开文件...</string>
+    <string>Open a C++ code file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -128,10 +142,10 @@
   </action>
   <action name="actionSelectAll">
    <property name="text">
-    <string>全选</string>
+    <string>Select All</string>
    </property>
    <property name="toolTip">
-    <string>选择全部文本</string>
+    <string>Select all text</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -143,7 +157,7 @@
      <normaloff>:/image/Undo.png</normaloff>:/image/Undo.png</iconset>
    </property>
    <property name="text">
-    <string>撤销</string>
+    <string>Undo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
@@ -155,7 +169,7 @@
      <normaloff>:/image/Redo.png</normaloff>:/image/Redo.png</iconset>
    </property>
    <property name="text">
-    <string>重做</string>
+    <string>Redo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
@@ -163,18 +177,18 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>关于 HJ Editor</string>
+    <string>About</string>
    </property>
    <property name="toolTip">
-    <string>关于 HJ Editor</string>
+    <string>About Project Thermite</string>
    </property>
   </action>
   <action name="actionDocument">
    <property name="text">
-    <string>说明文档</string>
+    <string>Readme</string>
    </property>
    <property name="toolTip">
-    <string>查看说明文档</string>
+    <string>View readme</string>
    </property>
   </action>
   <action name="actionSave_File">
@@ -183,10 +197,10 @@
      <normaloff>:/image/Save.png</normaloff>:/image/Save.png</iconset>
    </property>
    <property name="text">
-    <string>保存文件</string>
+    <string>Save</string>
    </property>
    <property name="toolTip">
-    <string>保存文件</string>
+    <string>Save the file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -198,10 +212,10 @@
      <normaloff>:/image/Run.png</normaloff>:/image/Run.png</iconset>
    </property>
    <property name="text">
-    <string>运行</string>
+    <string>Run</string>
    </property>
    <property name="toolTip">
-    <string>编译并运行代码</string>
+    <string>Compile, assemble, and simulate</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -213,10 +227,10 @@
      <normaloff>:/image/Setting.png</normaloff>:/image/Setting.png</iconset>
    </property>
    <property name="text">
-    <string>设置</string>
+    <string>Settings</string>
    </property>
    <property name="toolTip">
-    <string>更改编辑器的设置</string>
+    <string>Change the settings</string>
    </property>
    <property name="visible">
     <bool>false</bool>

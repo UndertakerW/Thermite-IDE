@@ -21,7 +21,7 @@ protected:
   void keyPressEvent(QKeyEvent *event) override;
 private:
   QPlainTextEdit* p;
-  QColor backgroundColor;
+  QColor toolbarColor;
   QColor highlightColor;
 };
 

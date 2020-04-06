@@ -13,11 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
   setUpHighlighter();
   //init status bar
   ui->outputText->parentWindow=this;
-  ui->statusBar->showMessage(tr("Ready"));
+  ui->statusBar->showMessage(tr("Version 0.1"));
   //--------init toolbar------------
   //ui->statusBar->setStyleSheet("QStatusBar{background:rgb(50,50,50);}");
   ui->mainToolBar->setMovable(false);
-  ui->mainToolBar->setStyleSheet("QToolButton:hover {background-color:darkgray} QToolBar {background: rgb(82,82,82);border: none;}");
+  ui->mainToolBar->setStyleSheet("QToolButton:hover {background-color:darkgray} QToolBar {background: rgb(119, 136, 153);border: none;}");
   //--------------------------------
 
   runIcon.addPixmap(QPixmap(":/image/Run.png"));
@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   //---------窗口背景颜色-------------
   QPalette windowPalette=this->palette();
-  windowPalette.setColor(QPalette::Active,QPalette::Window,QColor(82,82,82));
-  windowPalette.setColor(QPalette::Inactive,QPalette::Window,QColor(82,82,82));
+  windowPalette.setColor(QPalette::Active,QPalette::Window,QColor(119, 136, 153));
+  windowPalette.setColor(QPalette::Inactive,QPalette::Window,QColor(119, 136, 153));
   this->setPalette(windowPalette);
   //--------------------------------
   initFileData();
@@ -76,7 +76,7 @@ void MainWindow::redo(){
   ui->editor->redo();
 }
 void MainWindow::saveFile(){
-  QString savePath=QFileDialog::getSaveFileName(this,tr("选择保存路径与文件名"),fileName,tr("Cpp File(*.cpp *.c *.h)"));
+  QString savePath=QFileDialog::getSaveFileName(this,tr("Choose the path and filename for saving"),fileName,tr("C++ Code File(*.cpp *.c *.h)"));
   if(!savePath.isEmpty()){
       QFile out(savePath);
       out.open(QIODevice::WriteOnly|QIODevice::Text);
@@ -87,7 +87,7 @@ void MainWindow::saveFile(){
       QRegularExpression re(tr("(?<=\\/)\\w+\\.cpp|(?<=\\/)\\w+\\.c|(?<=\\/)\\w+\\.h"));
       fileName=re.match(savePath).captured();
       filePath=savePath;
-      this->setWindowTitle(tr("HJ Editor - ")+fileName);
+      this->setWindowTitle(tr("Project Thermite - ")+fileName);
     }
 }
 void MainWindow::newFile(){
@@ -98,10 +98,10 @@ void MainWindow::newFile(){
 }
 void MainWindow::openFile(){
   if(!fileSaved){
-      if(QMessageBox::Save==QMessageBox::question(this,tr("文件未保存"),tr("当前文件没有保存，是否保存？"),QMessageBox::Save,QMessageBox::Cancel))
+      if(QMessageBox::Save==QMessageBox::question(this,tr("File Unsaved"),tr("The current file is not saved. Do you want to save it?"),QMessageBox::Save,QMessageBox::Cancel))
         saveFile();
     }
-  QString openPath=QFileDialog::getOpenFileName(this,tr("选择要打开的文件"),filePath,tr("Cpp File(*.cpp *.c *.h)"));
+  QString openPath=QFileDialog::getOpenFileName(this,tr("Choose the file to open"),filePath,tr("C++ Code File(*.cpp *.c *.h)"));
   if(!openPath.isEmpty()){
       QFile in(openPath);
       in.open(QIODevice::ReadOnly|QIODevice::Text);
@@ -109,7 +109,7 @@ void MainWindow::openFile(){
       ui->editor->setPlainText(str.readAll());
       QRegularExpression re(tr("(?<=\\/)\\w+\\.cpp|(?<=\\/)\\w+\\.c|(?<=\\/)\\w+\\.h"));
       fileName=re.match(openPath).captured();
-      this->setWindowTitle(tr("HJ Editor - ")+fileName);
+      this->setWindowTitle(tr("Project Thermite - ")+fileName);
       filePath=openPath;
       fileSaved=true;
     }
@@ -121,13 +121,13 @@ void MainWindow::run(){
       return;
     }
   if(!fileSaved){
-      if(QMessageBox::Save==QMessageBox::question(this,tr("文件未保存"),tr("文件保存后才能运行，是否保存？"),QMessageBox::Save,QMessageBox::Cancel))
+      if(QMessageBox::Save==QMessageBox::question(this,tr("File Unsaved"),tr("A file must be saved and executed. Do you want to save it?"),QMessageBox::Save,QMessageBox::Cancel))
         saveFile();
     }
   if(fileSaved){
     //if(process!=nullptr)delete process;
     isRunning=true;
-    ui->statusBar->showMessage(tr("程序运行中..."));
+    ui->statusBar->showMessage(tr("Program running"));
     ui->outputText->clear();
     output.clear();
     error.clear();
@@ -145,7 +145,7 @@ void MainWindow::runFinished(int code){
   ui->actionRun->setIcon(runIcon);
   isRunning=false;
   qDebug()<<tr("exit code=")<<code;
-  ui->statusBar->showMessage(tr("Ready"));
+  ui->statusBar->showMessage(tr("Project Thermite Version 0.1"));
 }
 void MainWindow::updateOutput(){
   output=QString::fromLocal8Bit(process.readAllStandardOutput());
@@ -164,11 +164,11 @@ void MainWindow::inputData(QString data){
 }
 void MainWindow::closeEvent(QCloseEvent *event){
   if(!fileSaved){
-      if(QMessageBox::Save==QMessageBox::question(this,tr("未保存就要退出？"),tr("当前文件没有保存，是否保存？不保存文件改动将会丢失"),QMessageBox::Save,QMessageBox::Cancel))
+      if(QMessageBox::Save==QMessageBox::question(this,tr("Exit without saving?"),tr("The current file is not saved. Do you want to save it?"),QMessageBox::Save,QMessageBox::Cancel))
         saveFile();
       fileSaved=true;
     }
 }
 void MainWindow::about(){
-  QMessageBox::information(this,tr("关于"),tr(" HJ-Editor v1.0 \n 何振邦倾情奉献 \n更多信息访问huajihome.cn"),QMessageBox::Ok);
+  QMessageBox::information(this,tr("About"),tr("Project Thermite Version 0.1 \nBy AAAAgito, Lean-Li, MoyuST, PeterLau61, Sylviachelsea, and UndertakerW @CUHKSZ "),QMessageBox::Ok);
 }
