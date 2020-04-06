@@ -3,50 +3,80 @@
 #include "codeeditor.h"
 //![constructor]
 
-CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
-{
+/*
+ * The constructor of the editor object
+ * The parameter parent is a QWidget pointer (to the parent object)
+ * The super class is QPlainTextEdit
+ */
+CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
+
+    //Create the area for line numbers
     lineNumberArea = new LineNumberArea(this);
 
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-    connect(this,SIGNAL(cursorPositionChanged()),this,SLOT(showCompleteWidget()));
+    /* Connect signals to corresponding actions */
 
+    //When the number of lines change, calculate the width of the line number area
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+
+    //When scrolling the text box, scroll the text
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+
+    //When the cursor position changes, highlight the current line
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+
+    //When the cursor position changes, show all the widgets
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(showCompleteWidget()));
+
+    /* Initialization */
+
+    //Initialize the text box
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
-    //set color value
+
+    //Set colors by RGB
     lineColor.setRgb(56,60,69);
     editorColor.setRgb(34,39,49);
-
-    //set background color
     QPalette p = this->palette();
     p.setColor(QPalette::Active, QPalette::Base, editorColor);
     p.setColor(QPalette::Inactive, QPalette::Base, editorColor);
     p.setColor(QPalette::Text,Qt::white);
     this->setPalette(p);
-    //初始化补全列表
+
+    //Initialize the keyword list
     setUpCompleteList();
-    completeWidget= new CompleteListWidget(this);
+
+    //Initialize the widgets
+    completeWidget = new CompleteListWidget(this);
     completeWidget->hide();
     completeWidget->setMaximumHeight(fontMetrics().height()*5);
-    completeState=CompleteState::Hide;
+    completeState = CompleteState::Hide;
 }
 
 //![constructor]
 
 //![extraAreaWidth]
 
-int CodeEditor::lineNumberAreaWidth()
-{
-    int digits = 1;//行数数字的位数
-    int max = qMax(1, blockCount());
-    while (max >= 10) {
-        max /= 10;
-        ++digits;
-    }
-    if(digits<3)digits=3;
+/*
+ * Calculating the width of the line number area
+ */
+int CodeEditor::lineNumberAreaWidth(){
+    //The number of digits of the index (line number)
+    int digit = 1;
+    int index;
+    if (blockCount() >= 1) index = blockCount();
+    else index = 1;
 
-    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+    //Count the number of digits
+    while (index >= 10) {
+        index /= 10;
+        digit++;
+    }
+
+    //Minimum width: 2 digits
+    if(digit <= 2) digit = 2;
+
+    //The space to reserve
+    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digit;
 
     return space;
 }
@@ -55,7 +85,9 @@ int CodeEditor::lineNumberAreaWidth()
 
 //![slotUpdateExtraAreaWidth]
 
-//设定左边留白的宽度，参数无效，没有用到
+/*
+ * Reserve place for the index area
+ */
 void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
@@ -64,15 +96,19 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 //![slotUpdateExtraAreaWidth]
 
 //![slotUpdateRequest]
-//文本框滚动时同时滚动行数
-void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
+/*
+ * On scrolling the text box in the vertical direction, scroll the line numbers & text
+ * The parameter &rect is a reference to a QRect object (the window)
+ * deltaY is the change in the vertical direction (how much the user scrolls)
+ */
+void CodeEditor::updateLineNumberArea(const QRect &qrect, int deltaY)
 {
-    if (dy)
-        lineNumberArea->scroll(0, dy);
+    if (deltaY)
+        lineNumberArea->scroll(0, deltaY);
     else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+        lineNumberArea->update(0, qrect.y(), lineNumberArea->width(), qrect.height());
 
-    if (rect.contains(viewport()->rect()))
+    if (qrect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
 
 }
@@ -80,11 +116,15 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 //![slotUpdateRequest]
 
 //![resizeEvent]
-//尺寸调整函数
-void CodeEditor::resizeEvent(QResizeEvent *e)
-{
+/*
+ * Adjust the size of the window
+ */
+void CodeEditor::resizeEvent(QResizeEvent *e){
+
+    //Call the resizeEvent method of the super class
     QPlainTextEdit::resizeEvent(e);
 
+    //Adjust the editor according to the new window
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
@@ -92,9 +132,10 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
 //![resizeEvent]
 
 //![cursorPositionChanged]
-
-void CodeEditor::highlightCurrentLine()
-{
+/*
+ * Highlight the current line for a better visual effect
+ */
+void CodeEditor::highlightCurrentLine(){
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
