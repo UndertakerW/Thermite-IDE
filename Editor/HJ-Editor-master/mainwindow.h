@@ -45,12 +45,12 @@ public slots:
   void changeSaveState(){
     //qDebug()<<"changed";
     if(firstLoad&&fileSaved){
-        this->setWindowTitle(tr("HJ Editor - ")+fileName);
+        this->setWindowTitle(tr("Project Thermite - ")+fileName);
         firstLoad=false;
         return;
       }
     fileSaved=false;
-    this->setWindowTitle(tr("HJ Editor - ")+fileName+tr("*"));
+    this->setWindowTitle(tr("Project Thermite - ")+fileName+tr("*"));
   }
 
   //---------工具栏响应函数---------
