@@ -21,26 +21,28 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     //When scrolling the text box, scroll the text
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
-    //When the cursor position changes, highlight the current line
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-
     //When the cursor position changes, show all the widgets
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(showCompleteWidget()));
 
     /* Initialization */
 
     //Initialize the text box
-    updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
+    textFont = QFont("Courier", 12);
+    parent->setFont(textFont);
+    updateLineNumberAreaWidth();
 
     //Set colors by RGB
-    lineColor.setRgb(248, 248, 255);
-    editorColor.setRgb(248, 248, 255);
+    lineNumberColor.setRgb(192, 192, 192); //Silver
+    backgroundColor.setRgb(248, 248, 255); //GhostWhite
+    textColor.setRgb(0, 0, 0);             //Black
+
     QPalette p = this->palette();
-    p.setColor(QPalette::Active, QPalette::Base, editorColor);
-    p.setColor(QPalette::Inactive, QPalette::Base, editorColor);
-    p.setColor(QPalette::Text,Qt::black);
+    p.setColor(QPalette::Active, QPalette::Base, backgroundColor);
+    p.setColor(QPalette::Inactive, QPalette::Base, backgroundColor);
+    p.setColor(QPalette::Text,textColor);
     this->setPalette(p);
+
+
 
     //Initialize the keyword list
     setUpCompleteList();
@@ -72,11 +74,8 @@ int CodeEditor::lineNumberAreaWidth(){
         digit++;
     }
 
-    //Minimum width: 4 digits
-    //if(digit <= 2) digit = 2;
-
     //The space to reserve
-    int space = fontMetrics().width(QLatin1Char('9')) * (digit + 2);
+    int space = fontMetrics().width(QLatin1Char(12)) * (digit + 2);
 
     return space;
 }
@@ -88,8 +87,7 @@ int CodeEditor::lineNumberAreaWidth(){
 /*
  * Reserve place for the index area
  */
-void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
-{
+void CodeEditor::updateLineNumberAreaWidth(){
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
@@ -101,15 +99,15 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
  * The parameter &rect is a reference to a QRect object (the window)
  * deltaY is the change in the vertical direction (how much the user scrolls)
  */
-void CodeEditor::updateLineNumberArea(const QRect &qrect, int deltaY)
+void CodeEditor::updateLineNumberArea(const QRect &rect, int deltaY)
 {
     if (deltaY)
         lineNumberArea->scroll(0, deltaY);
     else
-        lineNumberArea->update(0, qrect.y(), lineNumberArea->width(), qrect.height());
+        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
 
-    if (qrect.contains(viewport()->rect()))
-        updateLineNumberAreaWidth(0);
+    if (rect.contains(viewport()->rect()))
+        updateLineNumberAreaWidth();
 
 }
 
@@ -125,71 +123,59 @@ void CodeEditor::resizeEvent(QResizeEvent *e){
     QPlainTextEdit::resizeEvent(e);
 
     //Adjust the editor according to the new window
-    QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    QRect rect = contentsRect();
+    lineNumberArea->setGeometry(QRect(rect.left(), rect.top(), lineNumberAreaWidth(), rect.height()));
 }
 
 //![resizeEvent]
 
-//![cursorPositionChanged]
-/*
- * Highlight the current line for a better visual effect
- */
-void CodeEditor::highlightCurrentLine(){
-    QList<QTextEdit::ExtraSelection> extraSelections;
-
-    if (!isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
-
-        QColor highlightColor = QColor();
-        highlightColor.setRgb(248, 248, 255);
-
-        selection.format.setBackground(highlightColor);
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-    }
-
-    setExtraSelections(extraSelections);
-}
-
-//![cursorPositionChanged]
-
 //![extraAreaPaintEvent_0]
-//打印行号，此函数被paintEvent 调用，paintEvent在头文件里被重写
-void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
-{
+/*
+ * Print the line numbers
+ */
+void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event){
+
+    //Instantiate the QPainter class
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), lineColor);
+
+    //Before paint the line numbers, paint the line number area
+    painter.fillRect(event->rect(), backgroundColor);
 
 //![extraAreaPaintEvent_0]
 
 //![extraAreaPaintEvent_1]
     QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
-    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int) blockBoundingRect(block).height();
+
+    //blockNumber starts from 0, but line number starts from 1
+    int lineNumber = block.blockNumber() + 1;
+
+    //The position of the top of the block
+    int top = int (blockBoundingGeometry(block).translated(contentOffset()).top());
+    int height = int (blockBoundingRect(block).height());
 //![extraAreaPaintEvent_1]
 
 //![extraAreaPaintEvent_2]
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::lightGray);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
-                             Qt::AlignCenter, number);
-        }
+    while (block.isValid()) {
 
+        //Draw the current line number
+        painter.setPen(lineNumberColor);
+        painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignCenter,
+                         QString::number(lineNumber));
+
+        //The position of the top of the current block + The height of the block
+        //= the position of the bottom of the block = the position of the top of the next block
+        top += height;
+
+        //Go to the next block
         block = block.next();
-        top = bottom;
-        bottom = top + (int) blockBoundingRect(block).height();
-        ++blockNumber;
+        lineNumber++;
     }
 }
 //![extraAreaPaintEvent_2]
 
-//自动补全
+/*
+ * Dealing with key press
+ */
 void CodeEditor::keyPressEvent(QKeyEvent *event){
   //qDebug()<<event->key();
   if(event->modifiers()==Qt::ShiftModifier&&event->key()==40){
@@ -343,7 +329,7 @@ void CodeEditor::showCompleteWidget(){
       completeWidget->move(x,y);
       if(completeWidget->count()>5)completeWidget->setFixedHeight(fontMetrics().height()*6);
       else completeWidget->setFixedHeight(fontMetrics().height()*(completeWidget->count()+1));
-      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char('9'))+6)*maxSize);
+      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char(12))+6)*maxSize);
       completeWidget->show();
       completeState=CompleteState::Showing;
       completeWidget->setCurrentRow(0,QItemSelectionModel::Select);
@@ -365,9 +351,13 @@ int CodeEditor::getCompleteWidgetX(){
   completeState=CompleteState::Ignore;
   cursor.setPosition(pos);
   this->setTextCursor(cursor);
-  int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char('9'));
+  int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char(12));
   cursor.setPosition(origianlPos);
   this->setTextCursor(cursor);
   completeState=CompleteState::Hide;
   return x;
+}
+
+LineNumberArea::LineNumberArea(CodeEditor * editor) : QWidget(editor) {
+    codeEditor = editor;
 }

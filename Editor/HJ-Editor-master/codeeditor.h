@@ -24,7 +24,7 @@ class CodeEditor : public QPlainTextEdit
     Q_OBJECT
 
 public:
-    CodeEditor(QWidget *parent = 0);
+    CodeEditor(QWidget *parent = nullptr);
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
@@ -35,16 +35,17 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    void updateLineNumberAreaWidth(int newBlockCount);
-    void highlightCurrentLine();
+    void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect &, int);
     void showCompleteWidget();
     //void completeWidgetKeyDown();
 
 private:
     QWidget *lineNumberArea;
-    QColor lineColor;
-    QColor editorColor;
+    QFont textFont;
+    QColor lineNumberColor;
+    QColor backgroundColor;
+    QColor textColor;
     QStringList completeList;//储存自动填充的关键字
     //QListWidget *completeWidget;
     CompleteListWidget *completeWidget;
@@ -56,21 +57,25 @@ private:
 //![codeeditordefinition]
 //![extraarea]
 
-class LineNumberArea : public QWidget
-{
+class LineNumberArea : public QWidget{
 public:
-    LineNumberArea(CodeEditor *editor) : QWidget(editor) {
+
+    LineNumberArea(CodeEditor * editor);
+        //: QWidget(editor)
+    /*
+    {
         codeEditor = editor;
     }
+*/
 
     QSize sizeHint() const override {
         return QSize(codeEditor->lineNumberAreaWidth(), 0);
     }
 
 protected:
+    //Override the paintEvent function to paint the line numbers
     void paintEvent(QPaintEvent *event) override {
         codeEditor->lineNumberAreaPaintEvent(event);
-
     }
 
 private:

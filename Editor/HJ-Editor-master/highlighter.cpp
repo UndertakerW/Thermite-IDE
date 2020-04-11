@@ -1,9 +1,9 @@
 #include "highlighter.h"
 
 //! [0]
-Highlighter::Highlighter(QTextDocument *parent)
-    : QSyntaxHighlighter(parent)
-{
+Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
+    commentColor.setRgb(60,179,113); //SpringGreen
+
     HighlightingRule rule;
 
     keywordFormat.setForeground(QColor(30, 144, 255));
@@ -42,12 +42,12 @@ Highlighter::Highlighter(QTextDocument *parent)
 
 //! [3]
     //注释代码 规则
-    singleLineCommentFormat.setForeground(Qt::green);
+    singleLineCommentFormat.setForeground(commentColor);
     rule.pattern = QRegularExpression("//[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::green);
+    multiLineCommentFormat.setForeground(commentColor);
 //! [3]
 
 //! [4]
