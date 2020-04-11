@@ -33,7 +33,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
 
     //Set colors by RGB
     lineNumberColor.setRgb(192, 192, 192); //Silver
-    backgroundColor.setRgb(248, 248, 255); //GhostWhite
+    backgroundColor.setRgb(255, 255, 255); //White
     textColor.setRgb(0, 0, 0);             //Black
 
     QPalette p = this->palette();
@@ -50,6 +50,13 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     completeWidget->hide();
     completeWidget->setMaximumHeight(fontMetrics().height()*5);
     completeState = CompleteState::Hide;
+
+    /*
+    QPixmap pixmap(":/new/prefix1/images/1.png");
+    QPalette palette;
+    palette.setBrush(backgroundRole(), QBrush(pixmap));
+    setPalette(palette);
+    */
 }
 
 //![constructor]
@@ -73,7 +80,7 @@ int CodeEditor::lineNumberAreaWidth(){
     }
 
     //The space to reserve
-    int space = fontMetrics().width(QLatin1Char(12)) * (digit + 1);
+    int space = fontMetrics().width(QLatin1Char('0')) * (digit + 1);
 
     return space;
 }
@@ -253,8 +260,8 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
                 this->insertPlainText(QString(QChar::Space));
                 empty++;
             }
-            else if (c == QChar::Tabulation){
-                this->insertPlainText(QString(QChar::Tabulation));
+            else if (c == tr("\t")){
+                this->insertPlainText(tr("    "));
                 empty++;
             }
             else break;
@@ -266,20 +273,29 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
         if(line.at(line.count()-1)==')'){
             if (lineContent.startsWith(tr("for(")) || lineContent.startsWith(tr("while(")) ||
                     lineContent.startsWith(tr("switch(")) || lineContent.startsWith(tr("if("))){
-                this->insertPlainText(tr("  "));
+                for(QChar c : line){
+                    if(c.isSpace()){
+                        this->insertPlainText(QString(QChar::Space));
+                    }
+                    else if (c == tr("\t")){
+                        this->insertPlainText(tr("    "));
+                    }
+                    else break;
+                }
+                this->insertPlainText(tr("    "));
             }
         }
     //The current line ends with '{'
         if(line.at(line.count()-1) == '{'){
-            this->insertPlainText(tr("  "));
+            this->insertPlainText(tr("    "));
             int pos = this->textCursor().position();
             this->insertPlainText(tr("\n"));
             for(QChar c : line){
                 if(c.isSpace()){
                     this->insertPlainText(QString(QChar::Space));
                 }
-                else if (c == QChar::Tabulation){
-                    this->insertPlainText(QString(QChar::Tabulation));
+                else if (c == tr("\t")){
+                    this->insertPlainText(tr("    "));
                 }
                 else break;
             }
@@ -383,7 +399,7 @@ void CodeEditor::showCompleteWidget(){
       completeWidget->move(x,y);
       if(completeWidget->count()>5)completeWidget->setFixedHeight(fontMetrics().height()*6);
       else completeWidget->setFixedHeight(fontMetrics().height()*(completeWidget->count()+1));
-      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char(12))+6)*maxSize);
+      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0'))+6)*maxSize);
       completeWidget->show();
       completeState=CompleteState::Showing;
       completeWidget->setCurrentRow(0,QItemSelectionModel::Select);
@@ -405,7 +421,7 @@ int CodeEditor::getCompleteWidgetX(){
   completeState=CompleteState::Ignore;
   cursor.setPosition(pos);
   this->setTextCursor(cursor);
-  int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char(12));
+  int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char('0'));
   cursor.setPosition(origianlPos);
   this->setTextCursor(cursor);
   completeState=CompleteState::Hide;

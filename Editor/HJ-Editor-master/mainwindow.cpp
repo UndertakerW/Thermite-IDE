@@ -13,11 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
   setUpHighlighter();
   //init status bar
   ui->outputText->parentWindow=this;
-  ui->statusBar->showMessage(tr("Version 0.1"));
+  ui->statusBar->showMessage(tr(" Project Thermite Version 0.1"));
   //--------init toolbar------------
   //ui->statusBar->setStyleSheet("QStatusBar{background:rgb(50,50,50);}");
-  ui->mainToolBar->setMovable(false);
-  ui->mainToolBar->setStyleSheet("QToolButton:hover {background-color:darkgray} QToolBar {background: rgb(119, 136, 153);border: none;}");
+  //ui->mainToolBar->setMovable(false);
+  //ui->mainToolBar->setStyleSheet("QToolButton:hover {background-color:darkgray} QToolBar {background: rgb(248, 248, 248);border: none;}");
+  ui->menuBar->setStyleSheet("QMenuBar{background:rgb(248, 248, 248);}");
   //--------------------------------
 
   runIcon.addPixmap(QPixmap(":/image/Run.png"));
@@ -25,14 +26,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
   //---------窗口背景颜色-------------
   QPalette windowPalette=this->palette();
-  windowPalette.setColor(QPalette::Active,QPalette::Window,QColor(119, 136, 153));
-  windowPalette.setColor(QPalette::Inactive,QPalette::Window,QColor(119, 136, 153));
+  windowColor.setRgb(248,248,248);
+  windowPalette.setColor(QPalette::Active,QPalette::Window,QColor(windowColor));
+  windowPalette.setColor(QPalette::Inactive,QPalette::Window,QColor(windowColor));
   this->setPalette(windowPalette);
   //--------------------------------
   initFileData();
   connect(ui->actionNewFile,SIGNAL(triggered(bool)),this,SLOT(newFile()));
   connect(ui->actionOpen,SIGNAL(triggered(bool)),this,SLOT(openFile()));
-  connect(ui->actionSave_File,SIGNAL(triggered(bool)),this,SLOT(saveFile()));
+  connect(ui->actionSaveFile,SIGNAL(triggered(bool)),this,SLOT(saveFile()));
   connect(ui->actionUndo,SIGNAL(triggered(bool)),this,SLOT(undo()));
   connect(ui->actionRedo,SIGNAL(triggered(bool)),this,SLOT(redo()));
   connect(ui->editor,SIGNAL(textChanged()),this,SLOT(changeSaveState()));
@@ -54,14 +56,16 @@ void MainWindow::setUpHighlighter(){
   font.setFixedPitch(true);
   //font.setPointSize(20);
   ui->editor->setFont(font);
-  ui->editor->setTabStopWidth(fontMetrics().width(QLatin1Char('9'))*4);
+  ui->editor->setTabStopWidth(fontMetrics().width(QLatin1Char('0'))*4);
   highlighter=new Highlighter(ui->editor->document());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event){
   QMainWindow::resizeEvent(event);
-  ui->editor->setGeometry(10,0,width()-20,height()-ui->statusBar->height()-ui->mainToolBar->height()-80-15);
-  ui->outputText->setGeometry(10,ui->editor->height()+10,this->width()-20,80);
+  ui->editor->setGeometry(10,0,width()-20,height()-ui->statusBar->height()-160);
+                          //-ui->mainToolBar->height()-80-15);
+  ui->outputText->setGeometry(10,ui->editor->height()+10,this->width()-20,115);
+    //ui->statusBar->setGeometry(30,ui->editor->height()+ui->outputText->height()+10,this->width()-20,22);
 }
 void MainWindow::initFileData(){
   fileName=tr("Untitled.cpp");
@@ -117,7 +121,6 @@ void MainWindow::openFile(){
 void MainWindow::run(){
   if(isRunning){
       process.terminate();
-      ui->actionRun->setIcon(runIcon);
       return;
     }
   if(!fileSaved){
@@ -127,7 +130,7 @@ void MainWindow::run(){
   if(fileSaved){
     //if(process!=nullptr)delete process;
     isRunning=true;
-    ui->statusBar->showMessage(tr("Program running"));
+    ui->statusBar->showMessage(tr(" Program running"));
     ui->outputText->clear();
     output.clear();
     error.clear();
@@ -138,14 +141,12 @@ void MainWindow::run(){
     process.start("bash", QStringList() << "-c" << QString(tr("g++ ")+filePath+tr(" -o ")+buildPath+tr(";")+buildPath));
     process.waitForStarted();
     ui->outputText->setFocus();
-    ui->actionRun->setIcon(stopIcon);
     }
 }
 void MainWindow::runFinished(int code){
-  ui->actionRun->setIcon(runIcon);
   isRunning=false;
   qDebug()<<tr("exit code=")<<code;
-  ui->statusBar->showMessage(tr("Project Thermite Version 0.1"));
+  ui->statusBar->showMessage(tr(" Project Thermite Version 0.1"));
 }
 void MainWindow::updateOutput(){
   output=QString::fromLocal8Bit(process.readAllStandardOutput());
