@@ -45,18 +45,3 @@ RESOURCES += \
     image.qrc
 
 ICON = icon.icns
-
-DISTFILES += \
-    ICONS/About.png \
-    ICONS/Assemble.png \
-    ICONS/Compile.png \
-    ICONS/Help.png \
-    ICONS/New.png \
-    ICONS/Open.png \
-    ICONS/Redo.png \
-    ICONS/Run.png \
-    ICONS/Save.png \
-    ICONS/SelectAll.png \
-    ICONS/Settings.png \
-    ICONS/Simulate.png \
-    ICONS/Undo.png

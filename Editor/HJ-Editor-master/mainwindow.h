@@ -19,7 +19,6 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 private:
-    QColor windowColor;
   QIcon runIcon;
   QIcon stopIcon;
   Ui::MainWindow *ui;

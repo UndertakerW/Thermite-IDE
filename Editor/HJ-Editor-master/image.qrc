@@ -1,20 +1,13 @@
 <RCC>
-    <qresource prefix="/image"/>
-    <qresource prefix="/">
-        <file>ICONS/About.png</file>
-        <file>ICONS/Assemble.png</file>
-        <file>ICONS/Compile.png</file>
-        <file>ICONS/Help.png</file>
-        <file>ICONS/New.png</file>
-        <file>ICONS/Open.png</file>
-        <file>ICONS/Redo.png</file>
-        <file>ICONS/Run.png</file>
-        <file>ICONS/Save.png</file>
-        <file>ICONS/SelectAll.png</file>
-        <file>ICONS/Settings.png</file>
-        <file>ICONS/Simulate.png</file>
-        <file>ICONS/Undo.png</file>
-        <file>ICONS/Document.png</file>
-        <file>ICONS/Icon.png</file>
+    <qresource prefix="/image">
+        <file>About.png</file>
+        <file>New.png</file>
+        <file>Open.png</file>
+        <file>Save.png</file>
+        <file>Redo.png</file>
+        <file>Undo.png</file>
+        <file>Run.png</file>
+        <file>Setting.png</file>
+        <file>stop.png</file>
     </qresource>
 </RCC>
