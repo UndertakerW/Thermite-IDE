@@ -16,7 +16,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     /* Connect signals to corresponding actions */
 
     //When the number of lines change, calculate the width of the line number area
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth()));
 
     //When scrolling the text box, scroll the text
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
@@ -44,10 +44,8 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
 
 
 
-    //Initialize the keyword list
+    //Initialize the keyword association function
     setUpCompleteList();
-
-    //Initialize the widgets
     completeWidget = new CompleteListWidget(this);
     completeWidget->hide();
     completeWidget->setMaximumHeight(fontMetrics().height()*5);
@@ -75,7 +73,7 @@ int CodeEditor::lineNumberAreaWidth(){
     }
 
     //The space to reserve
-    int space = fontMetrics().width(QLatin1Char(12)) * (digit + 2);
+    int space = fontMetrics().width(QLatin1Char(12)) * (digit + 1);
 
     return space;
 }
@@ -177,88 +175,144 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event){
  * Dealing with key press
  */
 void CodeEditor::keyPressEvent(QKeyEvent *event){
-  //qDebug()<<event->key();
-  if(event->modifiers()==Qt::ShiftModifier&&event->key()==40){
-      this->insertPlainText(tr("()"));
-      this->moveCursor(QTextCursor::PreviousCharacter);
+
+    //Keyword association
+
+    //Move down the option
+    if (completeState == CompleteState::Showing && event->key() == Qt::Key_Down){
+        int index = completeWidget->currentRow();
+        int count = completeWidget->count();
+        if (index < count-1){
+            completeWidget->setCurrentRow(index+1);
+        }
     }
-  else if(event->modifiers()==Qt::ShiftModifier&&event->key()==34){
-      this->insertPlainText(tr("\"\""));
-      this->moveCursor(QTextCursor::PreviousCharacter);
+
+    //Move up the option
+    else if(completeState == CompleteState::Showing && event->key() == Qt::Key_Up){
+        int index = completeWidget->currentRow();
+        if(index > 0)
+            completeWidget->setCurrentRow(index-1);
     }
-  else if(event->key()==16777235&&completeState==CompleteState::Showing){
-      if(completeWidget->currentRow()>0)
-        completeWidget->setCurrentRow(completeWidget->currentRow()-1);
+
+    //Select the current option
+    else if(completeState == CompleteState::Showing && event->key()==Qt::Key_Return){
+        QString insertText = completeWidget->currentItem()->text();
+        QString word = this->getWordOfCursor();
+
+        //Shut down the association list
+        completeState=CompleteState::Ignore;
+
+        //Delete the incomplete word and insert the selected keyword
+        for(int i=0; i<word.count(); i++)
+                this->textCursor().deletePreviousChar();
+        this->insertPlainText(insertText);
+
+
+        if(insertText == tr("#include <>") || insertText == tr("#include \"\""))
+            this->moveCursor(QTextCursor::PreviousCharacter);
+
+        completeState=CompleteState::Hide;
+        completeWidget->hide();
     }
-  else if(event->key()==16777237&&(completeState==CompleteState::Showing)){
-      if(completeWidget->currentRow()<completeWidget->count()-1)
-        completeWidget->setCurrentRow(completeWidget->currentRow()+1);
-    }
-  else if(event->key()==Qt::Key_Return&&(completeState==CompleteState::Showing)){
-      QString insertText=completeWidget->currentItem()->text();
-      QString word=this->getWordOfCursor();
-      completeState=CompleteState::Ignore;
-      for(int i=0;i<word.count();++i)
-        this->textCursor().deletePreviousChar();
-      this->insertPlainText(insertText);
-      if(insertText.contains(tr("#include")))
+
+    //Autocomplete parentheses
+    else if(event->key() == '('){
+        this->insertPlainText(tr("()"));
+        //Move the cursor to inbetween the parentheses
         this->moveCursor(QTextCursor::PreviousCharacter);
-      completeState=CompleteState::Hide;
-      completeWidget->hide();
-    }//*
-  else if(event->key()==Qt::Key_Return){//回车下行层级自动缩进功能
-      //获得本行的文本
-      QString temp=this->document()->findBlockByLineNumber(this->textCursor().blockNumber()).text();
-      QPlainTextEdit::keyPressEvent(event);
-      if(temp.count()<=0)return;
-      //输出回车那一行的前距
-      foreach(const QChar &c,temp){
-          if(c.isSpace())this->insertPlainText(c);
-          else break;
-        }
-      //如果是for() while() switch() if()则缩进一个tab,一种粗略地做法可能会出错
-      if(temp.at(temp.count()-1)==')'&&(temp.contains(tr("for("))||temp.contains(tr("while("))
-                                        ||temp.contains(tr("switch("))||temp.contains(tr("if("))))
-          this->insertPlainText(tr("\t"));
-      //如果是{ 则缩进并补}
-      if(temp.at(temp.count()-1)=='{'){
-          this->insertPlainText(tr("\t"));
-          QTextCursor cursor=this->textCursor();
-          int pos=this->textCursor().position();
-          this->insertPlainText(tr("\n"));
-          foreach(const QChar &c,temp){
-              if(c.isSpace())this->insertPlainText(c);
-              else break;
-            }
-          this->insertPlainText(tr("}"));
-          cursor.setPosition(pos);
-          this->setTextCursor(cursor);//返回中间一行
-        }
-    }//*/
-  else if(event->key()==Qt::Key_Backspace){
-      switch(this->document()->characterAt(this->textCursor().position()-1).toLatin1()){
-        case '(':
-          QPlainTextEdit::keyPressEvent(event);
-          if(this->document()->characterAt(this->textCursor().position())==')'){
-              this->textCursor().deleteChar();
-            }break;
-        case '\"':
-          QPlainTextEdit::keyPressEvent(event);
-          if(this->document()->characterAt(this->textCursor().position())=='\"'){
-              this->textCursor().deleteChar();
-            }break;
-        case '<':
-          QPlainTextEdit::keyPressEvent(event);
-          if(this->document()->characterAt(this->textCursor().position())=='>'){
-              this->textCursor().deleteChar();
-            }break;
-        default:
-          QPlainTextEdit::keyPressEvent(event);
-        }
     }
-  else{
+
+    //Autocomplete angle brackets
+    else if(event->key() == '<'){
+        this->insertPlainText(tr("<>"));
+        this->moveCursor(QTextCursor::PreviousCharacter);
+    }
+
+    //Autocomplete double quotation mark
+    else if(event->key() == '"'){
+        this->insertPlainText(tr("\"\""));
+        this->moveCursor(QTextCursor::PreviousCharacter);
+    }
+
+    //Auto indentation
+    else if(event->key()==Qt::Key_Return){
+
+    //Get the text of the current line
+    QString line = this->document()->findBlockByLineNumber(this->textCursor().blockNumber()).text();
+
+    //Call the keyPressEvent method of the superclass QPlainTextEdit
     QPlainTextEdit::keyPressEvent(event);
-    //qDebug()<<event->key();
+
+    //Do nothing if the current line is empty
+    if(line.count() == 0) return;
+
+    //Output the indentation of the current line
+    int empty = 0;
+        for(QChar c : line){
+            if(c.isSpace()){
+                this->insertPlainText(QString(QChar::Space));
+                empty++;
+            }
+            else if (c == QChar::Tabulation){
+                this->insertPlainText(QString(QChar::Tabulation));
+                empty++;
+            }
+            else break;
+        }
+
+    //Indentation increase
+    //The current line ends with ')'
+    QString lineContent = line.right(line.count()-empty);
+        if(line.at(line.count()-1)==')'){
+            if (lineContent.startsWith(tr("for(")) || lineContent.startsWith(tr("while(")) ||
+                    lineContent.startsWith(tr("switch(")) || lineContent.startsWith(tr("if("))){
+                this->insertPlainText(tr("  "));
+            }
+        }
+    //The current line ends with '{'
+        if(line.at(line.count()-1) == '{'){
+            this->insertPlainText(tr("  "));
+            int pos = this->textCursor().position();
+            this->insertPlainText(tr("\n"));
+            for(QChar c : line){
+                if(c.isSpace()){
+                    this->insertPlainText(QString(QChar::Space));
+                }
+                else if (c == QChar::Tabulation){
+                    this->insertPlainText(QString(QChar::Tabulation));
+                }
+                else break;
+            }
+            this->insertPlainText(tr("}"));
+            QTextCursor cursor = this->textCursor();
+            cursor.setPosition(pos);
+            this->setTextCursor(cursor);
+            }
+        }
+
+    else if(event->key() == Qt::Key_Backspace){
+
+
+        QChar prev = QChar(this->document()->characterAt(this->textCursor().position()-1));
+        QChar curr = QChar(this->document()->characterAt(this->textCursor().position()));
+
+        if (prev == '('){
+            if(curr == ')')
+                this->textCursor().deleteChar();
+        }
+        else if (prev == '<'){
+            if(curr == '>')
+                this->textCursor().deleteChar();
+        }
+        else if (prev == '\"'){
+            if(curr == '\"')
+                this->textCursor().deleteChar();
+        }
+        QPlainTextEdit::keyPressEvent(event);
+    }
+
+    else{
+        QPlainTextEdit::keyPressEvent(event);
     }
 }
 void CodeEditor::setUpCompleteList(){

@@ -1,8 +1,12 @@
 #include "highlighter.h"
 
 //! [0]
-Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
-    commentColor.setRgb(60,179,113); //SpringGreen
+Highlighter::Highlighter(QTextDocument * parent): QSyntaxHighlighter(parent){
+    //Keyword colors
+    functionColor.setRgb(255, 20, 147);//DeepPink
+    classColor.setRgb(255, 20, 147);   //DeepPink
+    commentColor.setRgb(60, 179, 113); //SpringGreen
+    includeColor.setRgb(60, 179, 113); //SpringGreen
 
     HighlightingRule rule;
 
@@ -34,7 +38,7 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 //! [2]
     //类 规则
     classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(QColor(255, 0, 255));
+    classFormat.setForeground(QColor(classColor));
     rule.pattern = QRegularExpression("(?<=class\\s)\\w*");
     rule.format = classFormat;
     highlightingRules.append(rule);
@@ -52,7 +56,7 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 
 //! [4]
     //头文件包含规则
-    quotationFormat.setForeground(Qt::darkGreen);
+    quotationFormat.setForeground(includeColor);
     rule.pattern = QRegularExpression("(?<=#include\\s)(<.*>)|(?<=#include)(<.*>)|(?<=#include\\s)(\".*\")|(?<=#include)(\".*\")|\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
@@ -60,7 +64,7 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 
 //! [5]
     //函数 规则
-    functionFormat.setForeground(QColor(255, 0, 255));
+    functionFormat.setForeground(functionColor);
     rule.pattern = QRegularExpression("\\b[A-Za-z0-9_]+(?=\\()");
     rule.format = functionFormat;
     highlightingRules.append(rule);

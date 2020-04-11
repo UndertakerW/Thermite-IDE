@@ -1,8 +1,7 @@
 #include "completelistwidget.h"
 
-CompleteListWidget::CompleteListWidget(QWidget *parent):QListWidget(parent)
-{
-  p=(QPlainTextEdit*)parent;
+CompleteListWidget::CompleteListWidget(QWidget *parent): QListWidget(parent){
+  p = (QPlainTextEdit *) parent;
   toolbarColor.setRgb(119, 136, 153);
   highlightColor.setRgb(119, 136, 153);
   QPalette palette=this->palette();
@@ -14,11 +13,16 @@ CompleteListWidget::CompleteListWidget(QWidget *parent):QListWidget(parent)
   this->setPalette(palette);
 }
 void CompleteListWidget::keyPressEvent(QKeyEvent *event){
-  if(event->key()==16777235||event->key()==16777237){
-      QListWidget::keyPressEvent(event);
-    }else{
-      QApplication::sendEvent(p,event);
-      p->setFocus();
+    //When the focus is on the keyword association list
+    //Call the keyPressEvent method of the superclass QListWidget when the key press is UP or DOWN
+    if(event->key()==Qt::Key_Up || event->key()==Qt::Key_Down){
+        QListWidget::keyPressEvent(event);
+    }
+    //Send the event to the QPlainTextEdit object when the key press is anything else
+    //And set the focus back to the QPlainTextEdit object
+    else {
+        QApplication::sendEvent(p, event);
+        p->setFocus();
     }
 }
 int CompleteListWidget::ldistance(const std::string source, const std::string target){

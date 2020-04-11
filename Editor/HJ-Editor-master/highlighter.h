@@ -15,7 +15,7 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 
 public:
-    Highlighter(QTextDocument *parent = 0);
+    Highlighter(QTextDocument *parent = nullptr);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -38,7 +38,10 @@ private:
     QTextCharFormat quotationFormat;
     QTextCharFormat functionFormat;
 
+    QColor functionColor;
+    QColor classColor;
     QColor commentColor;
+    QColor includeColor;
 };
 //! [0]
 
