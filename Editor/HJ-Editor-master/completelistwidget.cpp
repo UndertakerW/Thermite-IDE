@@ -2,14 +2,14 @@
 
 CompleteListWidget::CompleteListWidget(QWidget *parent): QListWidget(parent){
   p = (QPlainTextEdit *) parent;
-  toolbarColor.setRgb(119, 136, 153);
-  highlightColor.setRgb(119, 136, 153);
+  toolbarColor.setRgb(248, 248, 248);    //Light Grey
+  highlightColor.setRgb(248, 248, 248);  //Light Grey
   QPalette palette=this->palette();
   palette.setColor(QPalette::Active,QPalette::Highlight,highlightColor);
   palette.setColor(QPalette::Inactive,QPalette::Highlight,highlightColor);
   palette.setColor(QPalette::Active, QPalette::Base,toolbarColor);
   palette.setColor(QPalette::Inactive, QPalette::Base, toolbarColor);
-  palette.setColor(QPalette::Text,Qt::white);
+  palette.setColor(QPalette::Text,Qt::black);
   this->setPalette(palette);
 }
 void CompleteListWidget::keyPressEvent(QKeyEvent *event){

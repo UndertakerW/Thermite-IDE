@@ -17,6 +17,8 @@ protected:
   void keyPressEvent(QKeyEvent *event)override;
 protected slots:
   void resetCursorPosition();
+private:
+  QColor consoleColor;
 };
 
 #endif // CONSOLE_H

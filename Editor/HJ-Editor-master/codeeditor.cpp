@@ -51,12 +51,6 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     completeWidget->setMaximumHeight(fontMetrics().height()*5);
     completeState = CompleteState::Hide;
 
-    /*
-    QPixmap pixmap(":/new/prefix1/images/1.png");
-    QPalette palette;
-    palette.setBrush(backgroundRole(), QBrush(pixmap));
-    setPalette(palette);
-    */
 }
 
 //![constructor]
@@ -229,15 +223,17 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
         this->moveCursor(QTextCursor::PreviousCharacter);
     }
 
-    //Autocomplete angle brackets
-    else if(event->key() == '<'){
-        this->insertPlainText(tr("<>"));
+    //Autocomplete square brackets
+    else if(event->key() == '['){
+        this->insertPlainText(tr("[]"));
+        //Move the cursor to inbetween the square brackets
         this->moveCursor(QTextCursor::PreviousCharacter);
     }
 
     //Autocomplete double quotation mark
     else if(event->key() == '"'){
         this->insertPlainText(tr("\"\""));
+        //Move the cursor to inbetween the quotation marks
         this->moveCursor(QTextCursor::PreviousCharacter);
     }
 
@@ -261,7 +257,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
                 empty++;
             }
             else if (c == tr("\t")){
-                this->insertPlainText(tr("    "));
+                this->insertPlainText(tr("  "));
                 empty++;
             }
             else break;
@@ -278,16 +274,16 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
                         this->insertPlainText(QString(QChar::Space));
                     }
                     else if (c == tr("\t")){
-                        this->insertPlainText(tr("    "));
+                        this->insertPlainText(tr("  "));
                     }
                     else break;
                 }
-                this->insertPlainText(tr("    "));
+                this->insertPlainText(tr("  "));
             }
         }
     //The current line ends with '{'
         if(line.at(line.count()-1) == '{'){
-            this->insertPlainText(tr("    "));
+            this->insertPlainText(tr("  "));
             int pos = this->textCursor().position();
             this->insertPlainText(tr("\n"));
             for(QChar c : line){
@@ -295,7 +291,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
                     this->insertPlainText(QString(QChar::Space));
                 }
                 else if (c == tr("\t")){
-                    this->insertPlainText(tr("    "));
+                    this->insertPlainText(tr("  "));
                 }
                 else break;
             }
@@ -308,12 +304,16 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
 
     else if(event->key() == Qt::Key_Backspace){
 
-
         QChar prev = QChar(this->document()->characterAt(this->textCursor().position()-1));
         QChar curr = QChar(this->document()->characterAt(this->textCursor().position()));
 
+        //Pairwise deletion
         if (prev == '('){
             if(curr == ')')
+                this->textCursor().deleteChar();
+        }
+        else if (prev == '['){
+            if(curr == ']')
                 this->textCursor().deleteChar();
         }
         else if (prev == '<'){
@@ -331,6 +331,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
         QPlainTextEdit::keyPressEvent(event);
     }
 }
+
 void CodeEditor::setUpCompleteList(){
   completeList<< "char" << "class" << "const"
               << "double" << "enum" << "explicit"
