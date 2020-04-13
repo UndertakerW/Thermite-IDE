@@ -424,11 +424,6 @@ void CodeEditor::displayAssociationList(){
             associationWidget->addItem(new QListWidgetItem(keyword));
         }
 
-        //int x = this->getAssociationWidgetWidth();
-        //int y = this->cursorRect().y()+fontMetrics().height();
-
-        //associationWidget->move(x,y);
-
         placeAssociationWidget();
 
         if(associationWidget->count() >= 4)
