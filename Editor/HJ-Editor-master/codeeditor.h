@@ -28,7 +28,7 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
-    void setUpCompleteList();
+    void initAssociationDict();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

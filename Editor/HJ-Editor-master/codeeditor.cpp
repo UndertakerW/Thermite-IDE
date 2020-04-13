@@ -45,7 +45,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
 
 
     //Initialize the keyword association function
-    setUpCompleteList();
+    initAssociationDict();
     completeWidget = new CompleteListWidget(this);
     completeWidget->hide();
     completeWidget->setMaximumHeight(fontMetrics().height()*5);
@@ -332,7 +332,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
     }
 }
 
-void CodeEditor::setUpCompleteList(){
+void CodeEditor::initAssociationDict(){
   completeList<< "char" << "class" << "const"
               << "double" << "enum" << "explicit"
               << "friend" << "inline" << "int"
@@ -348,6 +348,7 @@ void CodeEditor::setUpCompleteList(){
               <<"default"<<"try"<<"return"<<"throw"<<"catch"<<"goto"<<"else"
               <<"extren"<<"this"<<"switch"<<"#include <>"<<"#include \"\""<<"#define"<<"iostream";
 }
+
 //得到当前光标位置的字符串
 QString CodeEditor::getWordOfCursor(){
   int pos=this->textCursor().position()-1;
@@ -369,42 +370,67 @@ QString CodeEditor::getWordOfCursor(){
 }
 
 void CodeEditor::showCompleteWidget(){
-  if(completeState==CompleteState::Ignore)return;//忽略光标和文本变化的响应,避免陷入事件死循环和互相钳制
-  completeWidget->hide();
-  completeState=CompleteState::Hide;
-  QString word=this->getWordOfCursor();
-  completeWidget->clear();
-  if(!word.isEmpty()){//光标所在单词是不是合法(能不能联想)
-      int maxSize=0;
-      QMap<QString,int> distance;
-      vector<QString> itemList;
-      foreach(const QString &temp,completeList){
-          if(temp.contains(word)){
-              //completeWidget->addItem(new QListWidgetItem(temp));
-              itemList.push_back(temp);
-              distance[temp]=CompleteListWidget::ldistance(temp.toStdString(),word.toStdString());
-              if(temp.length()>maxSize)maxSize=temp.length();
+    //Temporarily shut down the association widget to ignore changes of cursor and/or text
+    //This prevents an infinite loop and mutual restraint
+    if(completeState==CompleteState::Ignore) return;//忽略光标和文本变化的响应,避免陷入事件死循环和互相钳制
 
+    completeWidget->hide();
+    completeState=CompleteState::Hide;
+
+    //Get the word pointed by the cursor
+    QString word=this->getWordOfCursor();
+
+    //Clear the association list (the last list)
+    //The clear() method will delete the "new QListWidgetItem(keyword)" in the heap
+    //So no need to delete them again
+    completeWidget->clear();
+
+    if(word.length() >= 2){
+        int width = 0;
+        vector<QString> associationList;
+        for(const QString &keyword : completeList){
+            if(keyword.startsWith(word)){
+                associationList.push_back(keyword);
+                if(keyword.length() > width)
+                    width = keyword.length();
             }
         }
-      //有没有匹配的字符
-      if(itemList.size()>0){//如果有的话
-      sort(itemList.begin(),itemList.end(),[&](const QString &s1,const QString &s2)->bool{return distance[s1]<distance[s2]; });
-      foreach(const QString& item,itemList){
-          completeWidget->addItem(new QListWidgetItem(item));
+
+        //Sort the association list by the length of the keyword.
+        if(associationList.size()>0){
+            for(unsigned int i = 0; i < associationList.size()-1; i++){
+                for(unsigned int j = 0; j < associationList.size()-1-i; j++){
+                    if(associationList.at(j).length() > associationList.at(j+1).length()){
+                        QString temp = associationList.at(j);
+                        associationList.at(j) = associationList.at(j+1);
+                        associationList.at(j+1) = temp;
+                  }
+              }
+          }
+
+        //Put the keywords in the association list
+        for(const QString& keyword : associationList){
+            completeWidget->addItem(new QListWidgetItem(keyword));
         }
 
-      int x=this->getCompleteWidgetX();
-      int y=this->cursorRect().y()+fontMetrics().height();
+        int x = this->getCompleteWidgetX();
+        int y = this->cursorRect().y()+fontMetrics().height();
 
-      completeWidget->move(x,y);
-      if(completeWidget->count()>5)completeWidget->setFixedHeight(fontMetrics().height()*6);
-      else completeWidget->setFixedHeight(fontMetrics().height()*(completeWidget->count()+1));
-      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0'))+6)*maxSize);
+        completeWidget->move(x,y);
+
+        if(completeWidget->count() >= 4)
+            completeWidget->setFixedHeight(fontMetrics().height()*4);
+        else
+            completeWidget->setFixedHeight(fontMetrics().height()*(completeWidget->count()+1));
+
+      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0')))*width*2);
+
       completeWidget->show();
+
       completeState=CompleteState::Showing;
+
       completeWidget->setCurrentRow(0,QItemSelectionModel::Select);
-        }
+      }
     }
 
 }
