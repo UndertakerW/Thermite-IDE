@@ -1,5 +1,5 @@
-#ifndef COMPLETELISTWIDGET_H
-#define COMPLETELISTWIDGET_H
+#ifndef ASSOCIATIONLISTWIDGET_H
+#define ASSOCIATIONLISTWIDGET_H
 
 #include <QObject>
 #include <QWidget>
@@ -12,10 +12,10 @@
 using std::string;
 using std::vector;
 using std::min;
-class CompleteListWidget : public QListWidget
+class AssociationWidget : public QListWidget
 {
 public:
-  CompleteListWidget(QWidget *parent=0);
+  AssociationWidget(QWidget *parent = nullptr);
   static int ldistance(const string source, const string target);
 protected:
   void keyPressEvent(QKeyEvent *event) override;
@@ -25,4 +25,4 @@ private:
   QColor highlightColor;
 };
 
-#endif // COMPLETELISTWIDGET_H
+#endif // ASSOCIATIONLISTWIDGET_H

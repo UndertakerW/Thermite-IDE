@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include "completelistwidget.h"
+#include "associationwidget.h"
 #include <algorithm>
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -37,21 +37,20 @@ protected:
 private slots:
     void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect &, int);
-    void showCompleteWidget();
-    //void completeWidgetKeyDown();
+    void displayAssociationList();
 
 private:
-    QWidget *lineNumberArea;
+    QWidget * lineNumberArea;
     QFont textFont;
     QColor lineNumberColor;
     QColor backgroundColor;
     QColor textColor;
-    QStringList completeList;//储存自动填充的关键字
+    QStringList associationDict;
     //QListWidget *completeWidget;
-    CompleteListWidget *completeWidget;
-    QString getWordOfCursor();
-    int completeState;
-    int getCompleteWidgetX();
+    AssociationWidget * associationWidget;
+    QString getWordAtCursor();
+    int associationState; //Inactive = 0; Active = 1; Hidden = 2;
+    void placeAssociationWidget();
 };
 
 //![codeeditordefinition]
@@ -61,12 +60,6 @@ class LineNumberArea : public QWidget{
 public:
 
     LineNumberArea(CodeEditor * editor);
-        //: QWidget(editor)
-    /*
-    {
-        codeEditor = editor;
-    }
-*/
 
     QSize sizeHint() const override {
         return QSize(codeEditor->lineNumberAreaWidth(), 0);

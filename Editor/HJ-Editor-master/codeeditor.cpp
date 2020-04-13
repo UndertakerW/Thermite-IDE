@@ -22,7 +22,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
     //When the cursor position changes, show all the widgets
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(showCompleteWidget()));
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(displayAssociationList()));
 
     /* Initialization */
 
@@ -46,10 +46,10 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
 
     //Initialize the keyword association function
     initAssociationDict();
-    completeWidget = new CompleteListWidget(this);
-    completeWidget->hide();
-    completeWidget->setMaximumHeight(fontMetrics().height()*5);
-    completeState = CompleteState::Hide;
+    associationWidget = new AssociationWidget(this);
+    associationWidget->hide();
+    associationWidget->setMaximumHeight(fontMetrics().height()*5);
+    associationState = 2;
 
 }
 
@@ -180,28 +180,28 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
     //Keyword association
 
     //Move down the option
-    if (completeState == CompleteState::Showing && event->key() == Qt::Key_Down){
-        int index = completeWidget->currentRow();
-        int count = completeWidget->count();
+    if (associationState == 1 && event->key() == Qt::Key_Down){
+        int index = associationWidget->currentRow();
+        int count = associationWidget->count();
         if (index < count-1){
-            completeWidget->setCurrentRow(index+1);
+            associationWidget->setCurrentRow(index+1);
         }
     }
 
     //Move up the option
-    else if(completeState == CompleteState::Showing && event->key() == Qt::Key_Up){
-        int index = completeWidget->currentRow();
+    else if(associationState == 1 && event->key() == Qt::Key_Up){
+        int index = associationWidget->currentRow();
         if(index > 0)
-            completeWidget->setCurrentRow(index-1);
+            associationWidget->setCurrentRow(index-1);
     }
 
     //Select the current option
-    else if(completeState == CompleteState::Showing && event->key()==Qt::Key_Return){
-        QString insertText = completeWidget->currentItem()->text();
-        QString word = this->getWordOfCursor();
+    else if(associationState == 1 && event->key()==Qt::Key_Return){
+        QString insertText = associationWidget->currentItem()->text();
+        QString word = this->getWordAtCursor();
 
         //Shut down the association list
-        completeState=CompleteState::Ignore;
+        associationState = 0;
 
         //Delete the incomplete word and insert the selected keyword
         for(int i=0; i<word.count(); i++)
@@ -212,8 +212,8 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
         if(insertText == tr("#include <>") || insertText == tr("#include \"\""))
             this->moveCursor(QTextCursor::PreviousCharacter);
 
-        completeState=CompleteState::Hide;
-        completeWidget->hide();
+        associationState = 2;
+        associationWidget->hide();
     }
 
     //Autocomplete parentheses
@@ -333,7 +333,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
 }
 
 void CodeEditor::initAssociationDict(){
-  completeList<< "char" << "class" << "const"
+  associationDict << "char" << "class" << "const"
               << "double" << "enum" << "explicit"
               << "friend" << "inline" << "int"
               << "long" << "namespace" << "operator"
@@ -349,47 +349,58 @@ void CodeEditor::initAssociationDict(){
               <<"extren"<<"this"<<"switch"<<"#include <>"<<"#include \"\""<<"#define"<<"iostream";
 }
 
-//得到当前光标位置的字符串
-QString CodeEditor::getWordOfCursor(){
-  int pos=this->textCursor().position()-1;
-  QVector<QChar> words;
-  QString result;
-  QChar ch=this->document()->characterAt(pos+1);
-  if(ch.isDigit()||ch.isLetter()||ch==' ')return result;
-  ch=this->document()->characterAt(pos);
-  if(ch==' ')return result;
-  while(ch.isDigit()||ch.isLetter()||ch=='_'||ch=='#'){
-      words.append(ch);
-      pos--;
-      ch=this->document()->characterAt(pos);
-    }
-  for(int i=words.size()-1;i>=0;i--)
-    result+=words[i];
-  return result;
+/*
+ * Get the word pointed by the cursor
+ */
+QString CodeEditor::getWordAtCursor(){
+    int pos = this->textCursor().position();
+    QVector<QChar> chs;
+    QString word;
 
+    //If there is any digit/ letter/ whitespace after the cursor, return nothing
+    QChar ch = this->document()->characterAt(pos);
+    if(ch.isDigit() || ch.isLetter() || ch==QChar::Space)
+        return word;
+
+    //Push any digit/ letter/ underscope/ hash before the cursor into the vector chs
+    //Until reaching something else
+    ch = this->document()->characterAt(--pos);
+    while (ch.isDigit() || ch.isLetter() || ch=='_' || ch=='#'){
+        chs.append(ch);
+        ch = this->document()->characterAt(--pos);
+    }
+    if(chs.size() == 0){
+        return word;
+    }
+    else{
+        for(int i = chs.size()-1; i >= 0; i--)
+            word += chs[i];
+        return word;
+    }
 }
 
-void CodeEditor::showCompleteWidget(){
+void CodeEditor::displayAssociationList(){
     //Temporarily shut down the association widget to ignore changes of cursor and/or text
     //This prevents an infinite loop and mutual restraint
-    if(completeState==CompleteState::Ignore) return;//忽略光标和文本变化的响应,避免陷入事件死循环和互相钳制
+    if(associationState == 0) return;
 
-    completeWidget->hide();
-    completeState=CompleteState::Hide;
+    //Firstly hide the widget
+    associationWidget->hide();
+    associationState = 2;
 
     //Get the word pointed by the cursor
-    QString word=this->getWordOfCursor();
+    QString word = this->getWordAtCursor();
 
     //Clear the association list (the last list)
     //The clear() method will delete the "new QListWidgetItem(keyword)" in the heap
     //So no need to delete them again
-    completeWidget->clear();
+    associationWidget->clear();
 
     if(word.length() >= 2){
         int width = 0;
         vector<QString> associationList;
-        for(const QString &keyword : completeList){
-            if(keyword.startsWith(word)){
+        for(const QString &keyword : associationDict){
+            if(keyword.startsWith(word) && keyword != word){
                 associationList.push_back(keyword);
                 if(keyword.length() > width)
                     width = keyword.length();
@@ -397,7 +408,7 @@ void CodeEditor::showCompleteWidget(){
         }
 
         //Sort the association list by the length of the keyword.
-        if(associationList.size()>0){
+        if(associationList.size() > 0){
             for(unsigned int i = 0; i < associationList.size()-1; i++){
                 for(unsigned int j = 0; j < associationList.size()-1-i; j++){
                     if(associationList.at(j).length() > associationList.at(j+1).length()){
@@ -410,50 +421,55 @@ void CodeEditor::showCompleteWidget(){
 
         //Put the keywords in the association list
         for(const QString& keyword : associationList){
-            completeWidget->addItem(new QListWidgetItem(keyword));
+            associationWidget->addItem(new QListWidgetItem(keyword));
         }
 
-        int x = this->getCompleteWidgetX();
-        int y = this->cursorRect().y()+fontMetrics().height();
+        //int x = this->getAssociationWidgetWidth();
+        //int y = this->cursorRect().y()+fontMetrics().height();
 
-        completeWidget->move(x,y);
+        //associationWidget->move(x,y);
 
-        if(completeWidget->count() >= 4)
-            completeWidget->setFixedHeight(fontMetrics().height()*4);
+        placeAssociationWidget();
+
+        if(associationWidget->count() >= 4)
+            associationWidget->setFixedHeight(fontMetrics().height()*4);
         else
-            completeWidget->setFixedHeight(fontMetrics().height()*(completeWidget->count()+1));
+            associationWidget->setFixedHeight(fontMetrics().height()*(associationWidget->count()+1));
 
-      completeWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0')))*width*2);
+        associationWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0')))*width*2);
 
-      completeWidget->show();
+        associationWidget->show();
 
-      completeState=CompleteState::Showing;
+        associationState = 1;
 
-      completeWidget->setCurrentRow(0,QItemSelectionModel::Select);
+        associationWidget->setCurrentRow(0,QItemSelectionModel::Select);
+
+        }
+    }
+}
+
+void CodeEditor::placeAssociationWidget(){
+    QTextCursor cursor=this->textCursor();
+    int pos=cursor.position()-1;
+    int origianlPos=pos+1;
+    QChar ch;
+    ch=this->document()->characterAt(pos);
+    while((ch.isDigit()||ch.isLetter()||ch=='_'||ch=='#')&&pos>0){
+        pos--;
+        ch=this->document()->characterAt(pos);
       }
-    }
+    pos++;
+    associationState = 0;
+    cursor.setPosition(pos);
+    this->setTextCursor(cursor);
+    int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char('0'));
+    cursor.setPosition(origianlPos);
+    this->setTextCursor(cursor);
+    associationState = 2;
+    int y = this->cursorRect().y()+fontMetrics().height();
+    associationWidget->move(x,y);
+}
 
-}
-int CodeEditor::getCompleteWidgetX(){
-  QTextCursor cursor=this->textCursor();
-  int pos=cursor.position()-1;
-  int origianlPos=pos+1;
-  QChar ch;
-  ch=this->document()->characterAt(pos);
-  while((ch.isDigit()||ch.isLetter()||ch=='_'||ch=='#')&&pos>0){
-      pos--;
-      ch=this->document()->characterAt(pos);
-    }
-  pos++;
-  completeState=CompleteState::Ignore;
-  cursor.setPosition(pos);
-  this->setTextCursor(cursor);
-  int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char('0'));
-  cursor.setPosition(origianlPos);
-  this->setTextCursor(cursor);
-  completeState=CompleteState::Hide;
-  return x;
-}
 
 LineNumberArea::LineNumberArea(CodeEditor * editor) : QWidget(editor) {
     codeEditor = editor;

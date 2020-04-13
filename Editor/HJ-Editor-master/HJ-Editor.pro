@@ -24,18 +24,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    associationwidget.cpp \
         main.cpp \
         mainwindow.cpp \
     codeeditor.cpp \
     highlighter.cpp \
-    completelistwidget.cpp \
     console.cpp
 
 HEADERS += \
+    associationwidget.h \
         mainwindow.h \
     codeeditor.h \
     highlighter.h \
-    completelistwidget.h \
     console.h
 
 FORMS += \
