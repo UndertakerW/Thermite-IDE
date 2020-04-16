@@ -7,6 +7,9 @@
 //注意，要是没有寄存器用了的话，返回的 string 是 "full"
 std::string getReg(std:: string var);
 
+//用来释放寄存器空间
+void free(std::string var);
+
 //用来增加变量的local等级，要是进入一个更local里的大括号里面
 //就直接调用这个函数
 void uplevel();
