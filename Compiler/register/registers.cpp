@@ -9,15 +9,13 @@ using namespace std;
 static map<string, string> regMap;
 static stack<array<int, 34>> regStatus;
 
-//reseverd for futher use
-//-------------------------------------------+
-//used to store the information of registers |
-//when the new register covering the old one |
-//<<variable name>, <value, reglevel>        |
-//                                           |
-map<string, array<int,2>> globalReg;       //|
-int reglevel=-1;                           //|
-//-------------------------------------------+
+//used to store the information of registers
+//when the new register covering the old one
+//<<variable name, register>, reglevel>
+//
+map<array<string,2>, int> globalReg;
+int reglevel=-1;
+
 
 //register names
 //name of the register
@@ -39,11 +37,10 @@ string getReg(string var){
         regStatus.push({0});
     }
 
-    //register is using
+    //if register is using before, allocate a new register
+    //for the local variable
     if(regMap.count(var)){
-        //reserved for futher use
-//        globalReg[var] = {value, reglevel-1};
-        return regMap[var];
+        globalReg[{var, regMap[var]}] = reglevel-1;
     }
 
     //check $t0-$t9
@@ -125,13 +122,12 @@ void delevel(){
             }
         }
 
-        //resevered for futher use
-//        //recover the covered varialbes
-//        for(auto it=globalReg.begin(); it!= globalReg.end(); it--){
-//            if(((it->second)[2])==reglevel){
-//                //assign the register value
-//            }
-//        }
+        //recover the covered varialbes
+        for(auto it=globalReg.begin(); it!= globalReg.end(); it++){
+            if((it->second)==reglevel){
+                regMap[(it->first)[0]] = it->first[1];
+            }
+        }
     }
 }
 
