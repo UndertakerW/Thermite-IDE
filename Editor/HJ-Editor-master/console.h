@@ -11,7 +11,7 @@ class Console : public QPlainTextEdit
 {
   Q_OBJECT
 public:
-  Console(QWidget* parent=0);
+  Console(QWidget* parent = nullptr);
   MainWindow *parentWindow;
 protected:
   void keyPressEvent(QKeyEvent *event)override;

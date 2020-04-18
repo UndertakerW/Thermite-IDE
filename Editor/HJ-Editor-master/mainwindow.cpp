@@ -4,60 +4,49 @@
 #include<QFileDialog>
 #include <QFile>
 #include <QTextStream>
-MainWindow::MainWindow(QWidget *parent) :
-  QMainWindow(parent),
-  ui(new Ui::MainWindow)
-{
-  firstLoad=true;
-  ui->setupUi(this);
-  setUpHighlighter();
-  //init status bar
-  ui->outputText->parentWindow=this;
-  ui->statusBar->showMessage(tr(" Project Thermite Version 0.1"));
-  //--------init toolbar------------
-  //ui->statusBar->setStyleSheet("QStatusBar{background:rgb(50,50,50);}");
-  //ui->mainToolBar->setMovable(false);
-  //ui->mainToolBar->setStyleSheet("QToolButton:hover {background-color:darkgray} QToolBar {background: rgb(248, 248, 248);border: none;}");
-  ui->menuBar->setStyleSheet("QMenuBar{background:rgb(248, 248, 248);}");
-  //--------------------------------
 
-  runIcon.addPixmap(QPixmap(":/image/Run.png"));
-  stopIcon.addPixmap(QPixmap(":/image/stop.png"));
+/*
+ * The constructor of MainWindow
+ */
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow){
+    firstLoad = true;
+    ui->setupUi(this);
 
-  //---------窗口背景颜色-------------
-  QPalette windowPalette=this->palette();
-  windowColor.setRgb(248,248,248);
-  windowPalette.setColor(QPalette::Active,QPalette::Window,QColor(windowColor));
-  windowPalette.setColor(QPalette::Inactive,QPalette::Window,QColor(windowColor));
-  this->setPalette(windowPalette);
-  //--------------------------------
-  initFileData();
-  connect(ui->actionNewFile,SIGNAL(triggered(bool)),this,SLOT(newFile()));
-  connect(ui->actionOpen,SIGNAL(triggered(bool)),this,SLOT(openFile()));
-  connect(ui->actionSaveFile,SIGNAL(triggered(bool)),this,SLOT(saveFile()));
-  connect(ui->actionUndo,SIGNAL(triggered(bool)),this,SLOT(undo()));
-  connect(ui->actionRedo,SIGNAL(triggered(bool)),this,SLOT(redo()));
-  connect(ui->editor,SIGNAL(textChanged()),this,SLOT(changeSaveState()));
-  connect(ui->actionRun,SIGNAL(triggered(bool)),this,SLOT(run()));
-  connect(&process,SIGNAL(finished(int)),this,SLOT(runFinished(int)));
-  connect(&process,SIGNAL(readyReadStandardOutput()),this,SLOT(updateOutput()));
-  connect(&process,SIGNAL(readyReadStandardError()),this,SLOT(updateError()));
-  connect(ui->actionAbout,SIGNAL(triggered(bool)),this,SLOT(about()));
-  fileSaved=true;
+    //Initialize the status bar
+    ui->outputText->parentWindow = this;
+    ui->statusBar->showMessage(tr(" Project Thermite Version 0.1"));
+
+    //Initialize the menu bar
+    ui->menuBar->setStyleSheet("QMenuBar{background:rgb(248, 248, 248);}");
+
+    //Window color
+    QPalette p = this->palette();
+    windowColor.setRgb(248,248,248);
+    p.setColor(QPalette::Active,QPalette::Window,QColor(windowColor));
+    p.setColor(QPalette::Inactive,QPalette::Window,QColor(windowColor));
+    this->setPalette(p);
+
+    //Initialize the file data
+    initFileData();
+
+    connect(ui->actionNewFile,SIGNAL(triggered(bool)),this,SLOT(newFile()));
+    connect(ui->actionOpen,SIGNAL(triggered(bool)),this,SLOT(openFile()));
+    connect(ui->actionSaveFile,SIGNAL(triggered(bool)),this,SLOT(saveFile()));
+    connect(ui->actionUndo,SIGNAL(triggered(bool)),this,SLOT(undo()));
+    connect(ui->actionRedo,SIGNAL(triggered(bool)),this,SLOT(redo()));
+    connect(ui->editor,SIGNAL(textChanged()),this,SLOT(changeSaveState()));
+    connect(ui->actionRun,SIGNAL(triggered(bool)),this,SLOT(run()));
+    connect(&process,SIGNAL(finished(int)),this,SLOT(runFinished(int)));
+    connect(&process,SIGNAL(readyReadStandardOutput()),this,SLOT(updateOutput()));
+    connect(&process,SIGNAL(readyReadStandardError()),this,SLOT(updateError()));
+    connect(ui->actionAbout,SIGNAL(triggered(bool)),this,SLOT(about()));
+
+    fileSaved=true;
 }
 
 MainWindow::~MainWindow()
 {
   delete ui;
-}
-void MainWindow::setUpHighlighter(){
-  QFont font;
-  font.setFamily("Courier");
-  font.setFixedPitch(true);
-  //font.setPointSize(20);
-  ui->editor->setFont(font);
-  ui->editor->setTabStopWidth(fontMetrics().width(QLatin1Char('0'))*4);
-  highlighter=new Highlighter(ui->editor->document());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event){
@@ -68,10 +57,10 @@ void MainWindow::resizeEvent(QResizeEvent *event){
     //ui->statusBar->setGeometry(30,ui->editor->height()+ui->outputText->height()+10,this->width()-20,22);
 }
 void MainWindow::initFileData(){
-  fileName=tr("Untitled.cpp");
-  filePath=tr("~/Desktop/Untitled.cpp");
-  fileSaved=true;
-  isRunning=false;
+    fileName = tr("Untitled.cpp");
+    filePath = tr("~/Desktop/Untitled.cpp");
+    fileSaved = true;
+    fileStatus = false;
 }
 void MainWindow::undo(){
   ui->editor->undo();
@@ -119,7 +108,7 @@ void MainWindow::openFile(){
     }
 }
 void MainWindow::run(){
-  if(isRunning){
+  if(fileStatus){
       process.terminate();
       return;
     }
@@ -129,7 +118,7 @@ void MainWindow::run(){
     }
   if(fileSaved){
     //if(process!=nullptr)delete process;
-    isRunning=true;
+    fileStatus=true;
     ui->statusBar->showMessage(tr(" Program running"));
     ui->outputText->clear();
     output.clear();
@@ -144,7 +133,7 @@ void MainWindow::run(){
     }
 }
 void MainWindow::runFinished(int code){
-  isRunning=false;
+  fileStatus=false;
   qDebug()<<tr("exit code=")<<code;
   ui->statusBar->showMessage(tr(" Project Thermite Version 0.1"));
 }
@@ -158,10 +147,10 @@ void MainWindow::updateError(){
   //ui->outputText->setPlainText(output+tr("\n")+error);
   ui->outputText->setPlainText(ui->outputText->toPlainText()+error);//+tr("\n"));
   process.terminate();
-  isRunning=false;
+  fileStatus=false;
 }
 void MainWindow::inputData(QString data){
-  if(isRunning)process.write(data.toLocal8Bit());
+  if(fileStatus)process.write(data.toLocal8Bit());
 }
 void MainWindow::closeEvent(QCloseEvent *event){
   if(!fileSaved){

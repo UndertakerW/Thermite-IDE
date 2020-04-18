@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include "associationlist.h"
+#include "highlighter.h"
 #include <algorithm>
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -22,8 +23,7 @@ QT_END_NAMESPACE
 class LineNumberArea;
 
 
-class CodeEditor : public QPlainTextEdit
-{
+class CodeEditor : public QPlainTextEdit{
     Q_OBJECT
 
 public:
@@ -58,6 +58,7 @@ private:
     AssociationList * associationList;
     QString getWordAtCursor();
     int associationState; //Inactive = 0; Active = 1; Hidden = 2;
+    Highlighter * highlighter;
 
 };
 

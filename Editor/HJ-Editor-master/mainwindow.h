@@ -13,34 +13,37 @@ namespace Ui {
 
 class MainWindow : public QMainWindow
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = 0);
-  ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+protected:
+    void initFileData();
+
 private:
     QColor windowColor;
   QIcon runIcon;
   QIcon stopIcon;
   Ui::MainWindow *ui;
-  Highlighter *highlighter;
   QProcess process;
-  void setUpHighlighter();
-  //---------记录文件信息----------
+
+  //File
   QString fileName;
   QString filePath;
   bool fileSaved;
-  bool isRunning;
-  //bool fileEdited;
-  void initFileData();
+  bool fileStatus;
+
   bool firstLoad;
-  //-----------------------------
 
 
-  //---------code running data---
+  //Run
   QString output;
   QString error;
-  //-----------------------------
+
+  QFont textFont;
+
 public slots:
   void changeSaveState(){
     //qDebug()<<"changed";
@@ -53,14 +56,15 @@ public slots:
     this->setWindowTitle(tr("Project Thermite - ")+fileName+tr("*"));
   }
 
-  //---------工具栏响应函数---------
+  //Toolbar
   void newFile();
   void saveFile();
   void openFile();
   void undo();
   void redo();
   void run();
-  //------------------------------
+
+
   void runFinished(int code);
   void updateOutput();
   void updateError();

@@ -12,17 +12,19 @@
 using std::string;
 using std::vector;
 using std::min;
-class AssociationList : public QListWidget
-{
+class AssociationList : public QListWidget{
+
 public:
-  AssociationList(QWidget *parent = nullptr);
-  static int ldistance(const string source, const string target);
+    AssociationList(QWidget *parent);
+    static int ldistance(const string source, const string target);
+
 protected:
-  void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
-  QPlainTextEdit* p;
-  QColor toolbarColor;
-  QColor highlightColor;
+    QPlainTextEdit* p;
+    QColor toolbarColor;
+    QColor highlightColor;
 };
 
 #endif // ASSOCIATIONLIST_H

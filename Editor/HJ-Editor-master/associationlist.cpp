@@ -16,6 +16,7 @@ AssociationList::AssociationList(QWidget *parent): QListWidget(parent){
     p.setColor(QPalette::Inactive, QPalette::Highlight, highlightColor);
     p.setColor(QPalette::Text,Qt::black);
     this->setPalette(p);
+    this->setFont(parent->font());
 }
 
 void AssociationList::keyPressEvent(QKeyEvent *event){

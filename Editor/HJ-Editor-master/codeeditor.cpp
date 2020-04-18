@@ -27,8 +27,15 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     /* Initialization */
 
     //Initialize the text box
+
     textFont = QFont("Courier", 12);
+    textFont.setFixedPitch(true);
+    this->setFont(textFont);
     parent->setFont(textFont);
+    //this->setFont(textFont);
+    setTabStopWidth(fontMetrics().width(QLatin1Char('0'))*2);
+    highlighter = new Highlighter(this->document());
+
     placeLineNumberArea();
 
     //Set colors by RGB

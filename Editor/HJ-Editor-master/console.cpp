@@ -5,7 +5,7 @@ Console::Console(QWidget* parent):QPlainTextEdit(parent)
   connect(this,SIGNAL(cursorPositionChanged()),this,SLOT(resetCursorPosition()));
   consoleColor.setRgb(255, 255, 255); //White
 
-  //set background color
+  //Set background color
   QPalette p = this->palette();
   p.setColor(QPalette::Active, QPalette::Base, consoleColor);
   p.setColor(QPalette::Inactive, QPalette::Base, consoleColor);
