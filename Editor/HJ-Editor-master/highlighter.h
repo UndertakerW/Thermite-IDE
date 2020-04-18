@@ -4,12 +4,13 @@
 #include <QSyntaxHighlighter>
 #include <QTextCharFormat>
 #include <QRegularExpression>
+#include <fstream>
 
 QT_BEGIN_NAMESPACE
 class QTextDocument;
 QT_END_NAMESPACE
 
-//! [0]
+
 class Highlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
@@ -19,30 +20,32 @@ public:
 
 protected:
     void highlightBlock(const QString &text) override;
+    void initKeywordPatternsDict();
 
 private:
-    struct HighlightingRule
-    {
-        QRegularExpression pattern;
-        QTextCharFormat format;
-    };
-    QVector<HighlightingRule> highlightingRules;
 
-    QRegularExpression commentStartExpression;
-    QRegularExpression commentEndExpression;
+    QColor keywordColor;
+    QColor functionColor;
+    QColor classColor;
+    QColor commentColor;
+    QColor includeColor;
 
     QTextCharFormat keywordFormat;
     QTextCharFormat classFormat;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat multiLineCommentFormat;
-    QTextCharFormat quotationFormat;
+    QTextCharFormat includeFormat;
     QTextCharFormat functionFormat;
+    QStringList keywordPatternsDict;
 
-    QColor functionColor;
-    QColor classColor;
-    QColor commentColor;
-    QColor includeColor;
+    struct HighlightRule{
+        QRegularExpression pattern;
+        QTextCharFormat format;
+    };
+
+    QVector<HighlightRule> HighlightRules;
+
 };
-//! [0]
+
 
 #endif // HIGHLIGHTER_H

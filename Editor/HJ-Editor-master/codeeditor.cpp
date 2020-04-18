@@ -1,7 +1,5 @@
-#include <QtWidgets>
-#include <QDebug>
 #include "codeeditor.h"
-//![constructor]
+
 
 /*
  * The constructor of the editor object
@@ -16,12 +14,14 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     /* Connect signals to corresponding actions */
 
     //When the number of lines change, calculate the width of the line number area
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth()));
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(placeLineNumberArea()));
 
-    //When scrolling the text box, scroll the text
+    //When scrolling the text box, scroll the line number area & the association widget
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
-    //When the cursor position changes, show all the widgets
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateAssociationList()));
+
+    //When the cursor position changes, show the association list
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(displayAssociationList()));
 
     /* Initialization */
@@ -29,7 +29,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     //Initialize the text box
     textFont = QFont("Courier", 12);
     parent->setFont(textFont);
-    updateLineNumberAreaWidth();
+    placeLineNumberArea();
 
     //Set colors by RGB
     lineNumberColor.setRgb(192, 192, 192); //Silver
@@ -46,133 +46,15 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
 
     //Initialize the keyword association function
     initAssociationDict();
-    associationWidget = new AssociationWidget(this);
-    associationWidget->hide();
-    associationWidget->setMaximumHeight(fontMetrics().height()*5);
+    associationList = new AssociationList(this);
+    associationList->hide();
+    //associationList->setMaximumHeight(fontMetrics().height()*5);
     associationState = 2;
 
 }
 
-//![constructor]
-
-//![extraAreaWidth]
-
 /*
- * Calculating the width of the line number area
- */
-int CodeEditor::lineNumberAreaWidth(){
-    //The number of digits of the index (line number)
-    int digit = 1;
-    int index;
-    if (blockCount() >= 1) index = blockCount();
-    else index = 1;
-
-    //Count the number of digits
-    while (index >= 10) {
-        index /= 10;
-        digit++;
-    }
-
-    //The space to reserve
-    int space = fontMetrics().width(QLatin1Char('0')) * (digit + 1);
-
-    return space;
-}
-
-//![extraAreaWidth]
-
-//![slotUpdateExtraAreaWidth]
-
-/*
- * Reserve place for the index area
- */
-void CodeEditor::updateLineNumberAreaWidth(){
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
-}
-
-//![slotUpdateExtraAreaWidth]
-
-//![slotUpdateRequest]
-/*
- * On scrolling the text box in the vertical direction, scroll the line numbers & text
- * The parameter &rect is a reference to a QRect object (the window)
- * deltaY is the change in the vertical direction (how much the user scrolls)
- */
-void CodeEditor::updateLineNumberArea(const QRect &rect, int deltaY)
-{
-    if (deltaY)
-        lineNumberArea->scroll(0, deltaY);
-    else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
-
-    if (rect.contains(viewport()->rect()))
-        updateLineNumberAreaWidth();
-
-}
-
-//![slotUpdateRequest]
-
-//![resizeEvent]
-/*
- * Adjust the size of the window
- */
-void CodeEditor::resizeEvent(QResizeEvent *e){
-
-    //Call the resizeEvent method of the super class
-    QPlainTextEdit::resizeEvent(e);
-
-    //Adjust the editor according to the new window
-    QRect rect = contentsRect();
-    lineNumberArea->setGeometry(QRect(rect.left(), rect.top(), lineNumberAreaWidth(), rect.height()));
-}
-
-//![resizeEvent]
-
-//![extraAreaPaintEvent_0]
-/*
- * Print the line numbers
- */
-void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event){
-
-    //Instantiate the QPainter class
-    QPainter painter(lineNumberArea);
-
-    //Before paint the line numbers, paint the line number area
-    painter.fillRect(event->rect(), backgroundColor);
-
-//![extraAreaPaintEvent_0]
-
-//![extraAreaPaintEvent_1]
-    QTextBlock block = firstVisibleBlock();
-
-    //blockNumber starts from 0, but line number starts from 1
-    int lineNumber = block.blockNumber() + 1;
-
-    //The position of the top of the block
-    int top = int (blockBoundingGeometry(block).translated(contentOffset()).top());
-    int height = int (blockBoundingRect(block).height());
-//![extraAreaPaintEvent_1]
-
-//![extraAreaPaintEvent_2]
-    while (block.isValid()) {
-
-        //Draw the current line number
-        painter.setPen(lineNumberColor);
-        painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignCenter,
-                         QString::number(lineNumber));
-
-        //The position of the top of the current block + The height of the block
-        //= the position of the bottom of the block = the position of the top of the next block
-        top += height;
-
-        //Go to the next block
-        block = block.next();
-        lineNumber++;
-    }
-}
-//![extraAreaPaintEvent_2]
-
-/*
+ * The core part of the code editor
  * Dealing with key press
  */
 void CodeEditor::keyPressEvent(QKeyEvent *event){
@@ -181,23 +63,23 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
 
     //Move down the option
     if (associationState == 1 && event->key() == Qt::Key_Down){
-        int index = associationWidget->currentRow();
-        int count = associationWidget->count();
+        int index = associationList->currentRow();
+        int count = associationList->count();
         if (index < count-1){
-            associationWidget->setCurrentRow(index+1);
+            associationList->setCurrentRow(index+1);
         }
     }
 
     //Move up the option
     else if(associationState == 1 && event->key() == Qt::Key_Up){
-        int index = associationWidget->currentRow();
+        int index = associationList->currentRow();
         if(index > 0)
-            associationWidget->setCurrentRow(index-1);
+            associationList->setCurrentRow(index-1);
     }
 
     //Select the current option
     else if(associationState == 1 && event->key()==Qt::Key_Return){
-        QString insertText = associationWidget->currentItem()->text();
+        QString insertText = associationList->currentItem()->text();
         QString word = this->getWordAtCursor();
 
         //Shut down the association list
@@ -213,7 +95,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
             this->moveCursor(QTextCursor::PreviousCharacter);
 
         associationState = 2;
-        associationWidget->hide();
+        associationList->hide();
     }
 
     //Autocomplete parentheses
@@ -332,21 +214,139 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
     }
 }
 
+/*
+ * The constructor of the line number area,
+ * whose parent is the code editor
+ */
+LineNumberArea::LineNumberArea(CodeEditor * editor) : QWidget(editor) {
+    codeEditor = editor;
+}
+
+/*
+ * Get the size of the line number area
+ */
+QSize LineNumberArea::sizeHint() const{
+    return QSize(codeEditor->lineNumberAreaWidth(), 0);
+}
+
+/*
+ * Paint the line number area
+ */
+void LineNumberArea::paintEvent(QPaintEvent *event){
+    codeEditor->lineNumberAreaPaintEvent(event);
+}
+
+/*
+ * Place the text box on the right
+ * To reserve place for the index area
+ */
+void CodeEditor::placeLineNumberArea(){
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+/*
+ * Calculating the width of the line number area
+ */
+int CodeEditor::lineNumberAreaWidth(){
+    //The number of digits of the index (line number)
+    int digit = 1;
+    int index;
+    if (blockCount() >= 1) index = blockCount();
+    else index = 1;
+
+    //Count the number of digits
+    while (index >= 10) {
+        index /= 10;
+        digit++;
+    }
+
+    //The space to reserve
+    int space;
+    if (digit <= 2)
+        space = fontMetrics().width(QLatin1Char('0')) * 4;
+    else
+        space = fontMetrics().width(QLatin1Char('0')) * (digit + 2);
+
+    return space;
+}
+
+/*
+ * On scrolling the text box in the vertical direction, scroll the line number area
+ * The parameter &rect is a reference to a QRect object (the window)
+ * deltaY is the change in the vertical direction (how much the user scrolls)
+ */
+void CodeEditor::updateLineNumberArea(const QRect &rect, int deltaY){
+    if (deltaY)
+        lineNumberArea->scroll(0, deltaY);
+    else
+        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+
+    //if (rect.contains(viewport()->rect()))
+        placeLineNumberArea();
+}
+
+/*
+ * Print the line numbers
+ */
+void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event){
+
+    //Instantiate the QPainter class
+    QPainter painter(lineNumberArea);
+
+    //Before paint the line numbers, paint the line number area
+    painter.fillRect(event->rect(), backgroundColor);
+
+
+    QTextBlock block = firstVisibleBlock();
+
+    //blockNumber starts from 0, but line number starts from 1
+    int lineNumber = block.blockNumber() + 1;
+
+    //The position of the top of the block
+    int top = int (blockBoundingGeometry(block).translated(contentOffset()).top());
+    int height = int (blockBoundingRect(block).height());
+
+    while (block.isValid()) {
+
+        //Draw the current line number
+        painter.setPen(lineNumberColor);
+        painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignCenter,
+                         QString::number(lineNumber));
+
+        //The position of the top of the current block + The height of the block
+        //= the position of the bottom of the block = the position of the top of the next block
+        top += height;
+
+        //Go to the next block
+        block = block.next();
+        lineNumber++;
+    }
+}
+
+/*
+ * Adjust the size of the text box & line number area
+ */
+void CodeEditor::resizeEvent(QResizeEvent *e){
+
+    //Call the resizeEvent method of the super class
+    QPlainTextEdit::resizeEvent(e);
+
+    //Adjust the line number area according to the new window
+    QRect rect = contentsRect();
+    lineNumberArea->setGeometry(QRect(rect.left(), rect.top(), lineNumberAreaWidth(), rect.height()));
+}
+
+/*
+ * Initialize the association dictionary
+ */
 void CodeEditor::initAssociationDict(){
-  associationDict << "char" << "class" << "const"
-              << "double" << "enum" << "explicit"
-              << "friend" << "inline" << "int"
-              << "long" << "namespace" << "operator"
-              << "private" << "protected" << "public"
-              << "short" << "signals" << "signed"
-              << "slots" << "static" << "struct"
-              << "template" << "typedef" << "typename"
-              << "union" << "unsigned" << "virtual"
-              << "void" << "volatile" << "bool"<<"using"<<"constexpr"
-              <<"sizeof"<<"if"<<"for"<<"foreach"<<"while"<<"do"<<"case"
-              <<"break"<<"continue"<<"template"<<"delete"<<"new"
-              <<"default"<<"try"<<"return"<<"throw"<<"catch"<<"goto"<<"else"
-              <<"extren"<<"this"<<"switch"<<"#include <>"<<"#include \"\""<<"#define"<<"iostream";
+    std::ifstream in("AssociationDict.txt");
+    string keyword;
+    while (getline(in, keyword)){
+        QString qString = QString::fromStdString(keyword);
+        associationDict << qString;
+    }
+    in.close();
 }
 
 /*
@@ -385,7 +385,7 @@ void CodeEditor::displayAssociationList(){
     if(associationState == 0) return;
 
     //Firstly hide the widget
-    associationWidget->hide();
+    associationList->hide();
     associationState = 2;
 
     //Get the word pointed by the cursor
@@ -394,78 +394,83 @@ void CodeEditor::displayAssociationList(){
     //Clear the association list (the last list)
     //The clear() method will delete the "new QListWidgetItem(keyword)" in the heap
     //So no need to delete them again
-    associationWidget->clear();
+    associationList->clear();
 
     if(word.length() >= 2){
         int width = 0;
-        vector<QString> associationList;
+        vector<QString> keywords;
         for(const QString &keyword : associationDict){
             if(keyword.startsWith(word) && keyword != word){
-                associationList.push_back(keyword);
+                keywords.push_back(keyword);
+                // width = width of the longest word
                 if(keyword.length() > width)
                     width = keyword.length();
             }
         }
 
         //Sort the association list by the length of the keyword.
-        if(associationList.size() > 0){
-            for(unsigned int i = 0; i < associationList.size()-1; i++){
-                for(unsigned int j = 0; j < associationList.size()-1-i; j++){
-                    if(associationList.at(j).length() > associationList.at(j+1).length()){
-                        QString temp = associationList.at(j);
-                        associationList.at(j) = associationList.at(j+1);
-                        associationList.at(j+1) = temp;
+        if(keywords.size() > 0){
+            for(unsigned int i = 0; i < keywords.size()-1; i++){
+                for(unsigned int j = 0; j < keywords.size()-1-i; j++){
+                    if(keywords.at(j).length() > keywords.at(j+1).length()){
+                        QString temp = keywords.at(j);
+                        keywords.at(j) = keywords.at(j+1);
+                        keywords.at(j+1) = temp;
                   }
               }
           }
 
         //Put the keywords in the association list
-        for(const QString& keyword : associationList){
-            associationWidget->addItem(new QListWidgetItem(keyword));
+        for(const QString& keyword : keywords){
+            associationList->addItem(new QListWidgetItem(keyword));
         }
 
-        placeAssociationWidget();
+        placeAssociationList();
 
-        if(associationWidget->count() >= 4)
-            associationWidget->setFixedHeight(fontMetrics().height()*4);
+        //If the association list has more than 3 entries, set the height of the widget to be 4.
+        if(associationList->count() >= 4)
+            associationList->setFixedHeight(fontMetrics().height()*5);
         else
-            associationWidget->setFixedHeight(fontMetrics().height()*(associationWidget->count()+1));
+            associationList->setFixedHeight(fontMetrics().height()*(associationList->count()+1));
 
-        associationWidget->setFixedWidth((fontMetrics().width(QLatin1Char('0')))*width*2);
+        //Set the width of the association widget to be width * 2
+        associationList->setFixedWidth((fontMetrics().width(QLatin1Char('0')))*width*2);
 
-        associationWidget->show();
+        associationList->show();
 
         associationState = 1;
 
-        associationWidget->setCurrentRow(0,QItemSelectionModel::Select);
+        //Select the current row
+        associationList->setCurrentRow(0, QItemSelectionModel::Select);
 
         }
     }
 }
 
-void CodeEditor::placeAssociationWidget(){
+/*
+ * Place the association widget under the current row
+ */
+void CodeEditor::placeAssociationList(){
     QTextCursor cursor=this->textCursor();
-    int pos=cursor.position()-1;
-    int origianlPos=pos+1;
+    int pos = cursor.position()-1;
+    int width = 0;
     QChar ch;
-    ch=this->document()->characterAt(pos);
-    while((ch.isDigit()||ch.isLetter()||ch=='_'||ch=='#')&&pos>0){
+    ch = this->document()->characterAt(pos);
+    while((ch.isDigit() || ch.isLetter() || ch=='_' || ch=='#') && pos>0){
+        width++;
         pos--;
         ch=this->document()->characterAt(pos);
-      }
-    pos++;
-    associationState = 0;
-    cursor.setPosition(pos);
-    this->setTextCursor(cursor);
-    int x=this->cursorRect().x()+2*fontMetrics().width(QLatin1Char('0'));
-    cursor.setPosition(origianlPos);
-    this->setTextCursor(cursor);
-    associationState = 2;
-    int y = this->cursorRect().y()+fontMetrics().height();
-    associationWidget->move(x,y);
+    }
+    int x = this->cursorRect().x() + lineNumberArea->width() - width*fontMetrics().width(QLatin1Char('1'));
+    int y = this->cursorRect().y() + fontMetrics().height();
+    associationList->move(x,y);
 }
 
-
-LineNumberArea::LineNumberArea(CodeEditor * editor) : QWidget(editor) {
-    codeEditor = editor;
+/*
+ * On scrolling the text box in the vertical direction, replace the association list
+ */
+void CodeEditor::updateAssociationList(){
+    if (associationState == 1)
+        placeAssociationList();
 }
+

@@ -1,12 +1,16 @@
 #ifndef CODEEDITOR_H
 #define CODEEDITOR_H
 
+#include <QtWidgets>
+#include <QDebug>
+#include <fstream>
+#include <iostream>
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QPainter>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include "associationwidget.h"
+#include "associationlist.h"
 #include <algorithm>
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -17,7 +21,6 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-//![codeeditordefinition]
 
 class CodeEditor : public QPlainTextEdit
 {
@@ -28,16 +31,22 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
-    void initAssociationDict();
+
+
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void initAssociationDict();
+    void placeAssociationList();
+
 
 private slots:
-    void updateLineNumberAreaWidth();
+    void placeLineNumberArea();
     void updateLineNumberArea(const QRect &, int);
+    void updateAssociationList();
     void displayAssociationList();
+
 
 private:
     QWidget * lineNumberArea;
@@ -46,40 +55,28 @@ private:
     QColor backgroundColor;
     QColor textColor;
     QStringList associationDict;
-    //QListWidget *completeWidget;
-    AssociationWidget * associationWidget;
+    AssociationList * associationList;
     QString getWordAtCursor();
     int associationState; //Inactive = 0; Active = 1; Hidden = 2;
-    void placeAssociationWidget();
+
 };
 
-//![codeeditordefinition]
-//![extraarea]
 
 class LineNumberArea : public QWidget{
 public:
 
     LineNumberArea(CodeEditor * editor);
 
-    QSize sizeHint() const override {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
-    }
+    QSize sizeHint() const override;
 
 protected:
     //Override the paintEvent function to paint the line numbers
-    void paintEvent(QPaintEvent *event) override {
-        codeEditor->lineNumberAreaPaintEvent(event);
-    }
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     CodeEditor *codeEditor;
-};
-enum CompleteState{
-  Ignore=0,
-  Showing=1,
-  Hide=2
+
 };
 
-//![extraarea]
 
 #endif

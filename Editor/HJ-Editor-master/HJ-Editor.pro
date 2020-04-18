@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    associationwidget.cpp \
+    associationlist.cpp \
         main.cpp \
         mainwindow.cpp \
     codeeditor.cpp \
@@ -32,7 +32,7 @@ SOURCES += \
     console.cpp
 
 HEADERS += \
-    associationwidget.h \
+    associationlist.h \
         mainwindow.h \
     codeeditor.h \
     highlighter.h \

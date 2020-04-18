@@ -1,115 +1,118 @@
 #include "highlighter.h"
 
-//! [0]
+/*
+ * The constructor of the highlighter
+ */
 Highlighter::Highlighter(QTextDocument * parent): QSyntaxHighlighter(parent){
-    //Keyword colors
-    functionColor.setRgb(255, 20, 147);//DeepPink
-    classColor.setRgb(255, 20, 147);   //DeepPink
-    commentColor.setRgb(60, 179, 113); //SpringGreen
-    includeColor.setRgb(60, 179, 113); //SpringGreen
+    //Highlight colors
+    keywordColor.setRgb(30, 144, 255);  //DoderBlue
+    functionColor.setRgb(255, 20, 147); //DeepPink
+    classColor.setRgb(255, 20, 147);    //DeepPink
+    commentColor.setRgb(60, 179, 113);  //SpringGreen
+    includeColor.setRgb(60, 179, 113);  //SpringGreen
 
-    HighlightingRule rule;
+    keywordFormat.setForeground(keywordColor);
+    functionFormat.setForeground(functionColor);
+    classFormat.setForeground(QColor(classColor));
+    singleLineCommentFormat.setForeground(commentColor);
+    multiLineCommentFormat.setForeground(commentColor);
+    includeFormat.setForeground(includeColor);
 
-    keywordFormat.setForeground(QColor(30, 144, 255));
-    keywordFormat.setFontWeight(QFont::Bold);
-    QStringList keywordPatterns;
-    keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
-                    << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
-                    << "\\bfriend\\b" << "\\binline\\b" << "\\bint\\b"
-                    << "\\blong\\b" << "\\bnamespace\\b" << "\\boperator\\b"
-                    << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-                    << "\\bshort\\b" << "\\bsignals\\b" << "\\bsigned\\b"
-                    << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
-                    << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
-                    << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-                    << "\\bvoid\\b" << "\\bvolatile\\b" << "\\bbool\\b"<<"\\busing\\b"<<"\\bconstexpr\\b"
-                    <<"\\bsizeof\\b"<<"\\bif\\b"<<"\\bfor\\b"<<"\\bforeach\\b"<<"\\bwhile\\b"<<"\\bdo\\b"<<"\\bcase\\b"
-                    <<"\\bbreak\\b"<<"\\bcontinue\\b"<<"\\btemplate\\b"<<"\\bdelete\\b"<<"\\bnew\\b"
-                    <<"\\bdefault\\b"<<"\\btry\\b"<<"\\breturn\\b"<<"\\bthrow\\b"<<"\\bcatch\\b"<<"\\bgoto\\b"<<"\\belse\\b"
-                    <<"\\bextren\\b"<<"\\bthis\\b"<<"\\bswitch\\b"<<"\\binclude\\b"<<"\\bdefine\\b";
-    foreach (const QString &pattern, keywordPatterns) {
+
+    //Keyword
+    initKeywordPatternsDict();
+    HighlightRule rule;
+    for (const QString &pattern : keywordPatternsDict){
         rule.pattern = QRegularExpression(pattern);
         rule.format = keywordFormat;
-        highlightingRules.append(rule);
-//! [0] //! [1]
+        HighlightRules.append(rule);
     }
-//! [1]
 
-//! [2]
-    //类 规则
-    classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(QColor(classColor));
-    rule.pattern = QRegularExpression("(?<=class\\s)\\w*");
-    rule.format = classFormat;
-    highlightingRules.append(rule);
-//! [2]
-
-//! [3]
-    //注释代码 规则
-    singleLineCommentFormat.setForeground(commentColor);
-    rule.pattern = QRegularExpression("//[^\n]*");
-    rule.format = singleLineCommentFormat;
-    highlightingRules.append(rule);
-
-    multiLineCommentFormat.setForeground(commentColor);
-//! [3]
-
-//! [4]
-    //头文件包含规则
-    quotationFormat.setForeground(includeColor);
-    rule.pattern = QRegularExpression("(?<=#include\\s)(<.*>)|(?<=#include)(<.*>)|(?<=#include\\s)(\".*\")|(?<=#include)(\".*\")|\".*\"");
-    rule.format = quotationFormat;
-    highlightingRules.append(rule);
-//! [4]
-
-//! [5]
-    //函数 规则
-    functionFormat.setForeground(functionColor);
+    //Function
     rule.pattern = QRegularExpression("\\b[A-Za-z0-9_]+(?=\\()");
     rule.format = functionFormat;
-    highlightingRules.append(rule);
-//! [5]
+    HighlightRules.append(rule);
 
-//! [6]
-    commentStartExpression = QRegularExpression("/\\*");
-    commentEndExpression = QRegularExpression("\\*/");
+    //Class
+    rule.pattern = QRegularExpression("(?<=class\\s)\\w*");
+    rule.format = classFormat;
+    HighlightRules.append(rule);
+
+    //Single-Line Comments
+    rule.pattern = QRegularExpression("//[^\n]*");
+    rule.format = singleLineCommentFormat;
+    HighlightRules.append(rule);
+
+    //Multiple-Line Comments
+    //Special handling in the overriden highlightBlock method
+
+    //Include
+    rule.pattern = QRegularExpression("(?<=#include\\s)(<.*>)|(?<=#include)(<.*>)|(?<=#include\\s)(\".*\")|(?<=#include)(\".*\")|\".*\"");
+    rule.format = includeFormat;
+    HighlightRules.append(rule);
 }
-//! [6]
 
-//! [7]
-void Highlighter::highlightBlock(const QString &text)
-{
-    foreach (const HighlightingRule &rule, highlightingRules) {
+/*
+ * Override the highlightBlock method
+ * To highlight the text
+ */
+void Highlighter::highlightBlock(const QString &text){
+    //Search the text for each highlight rule
+    for (const HighlightRule &rule : HighlightRules){
         QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
-        while (matchIterator.hasNext()) {
+        //If found, highlight the text according to the format
+        while (matchIterator.hasNext()){
             QRegularExpressionMatch match = matchIterator.next();
             setFormat(match.capturedStart(), match.capturedLength(), rule.format);
         }
     }
-//! [7] //! [8]
+
+    //Detection for multiple-line comments
+
+    //Block State:
+    //0: not in comment, 1: in comment
+    //Set the state of the current block to be 0 (not in comment)
     setCurrentBlockState(0);
-//! [8]
 
-//! [9]
-    int startIndex = 0;
+    //Search for /* if the state of the previous block is not 1 (the previous block is not in comment)
+    int start = 0;
     if (previousBlockState() != 1)
-        startIndex = text.indexOf(commentStartExpression);
+        start = text.indexOf(QRegularExpression("/\\*"));
 
-//! [9] //! [10]
-    while (startIndex >= 0) {
-//! [10] //! [11]
-        QRegularExpressionMatch match = commentEndExpression.match(text, startIndex);
-        int endIndex = match.capturedStart();
-        int commentLength = 0;
-        if (endIndex == -1) {
+    //If found
+    while (start >= 0) {
+        //Search for the end of this multiple-line comment
+        QRegularExpressionMatch match = QRegularExpression("\\*/").match(text, start);
+        int end = match.capturedStart();
+        int length = 0;
+
+        //If this multiple-line comment has no end
+        if (end == -1) {
+            //Set the state of the current block to be 1 (in comment)
             setCurrentBlockState(1);
-            commentLength = text.length() - startIndex;
-        } else {
-            commentLength = endIndex - startIndex
-                            + match.capturedLength();
+            length = text.length() - start;
         }
-        setFormat(startIndex, commentLength, multiLineCommentFormat);
-        startIndex = text.indexOf(commentStartExpression, startIndex + commentLength);
+
+        //Else if this multiple-line comment has an end
+        //The state of the current block will not be changed for the time being
+        else {
+            length = (end + match.capturedLength()) - start;
+        }
+
+        //Highlight this multiple-line comment
+        setFormat(start, length, multiLineCommentFormat);
+
+        //Search for the next multiple-line comment
+        start = text.indexOf(QRegularExpression("/\\*"), start + length);
     }
 }
-//! [11]
+
+void Highlighter::initKeywordPatternsDict(){
+    std::ifstream in("KeywordPatternsDict.txt");
+    std::string pattern;
+    while(getline(in, pattern)){
+        QString qString = QString::fromStdString(pattern);
+        keywordPatternsDict << qString;
+    }
+    in.close();
+}

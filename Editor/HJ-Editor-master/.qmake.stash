@@ -1,0 +1,22 @@
+QMAKE_CXX.QT_COMPILER_STDCXX = 201402L
+QMAKE_CXX.QMAKE_GCC_MAJOR_VERSION = 7
+QMAKE_CXX.QMAKE_GCC_MINOR_VERSION = 3
+QMAKE_CXX.QMAKE_GCC_PATCH_VERSION = 0
+QMAKE_CXX.COMPILER_MACROS = \
+    QT_COMPILER_STDCXX \
+    QMAKE_GCC_MAJOR_VERSION \
+    QMAKE_GCC_MINOR_VERSION \
+    QMAKE_GCC_PATCH_VERSION
+QMAKE_CXX.INCDIRS = \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++ \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/i686-w64-mingw32 \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/backward \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include-fixed \
+    D:/APP/Qt/Tools/mingw730_32/i686-w64-mingw32/include
+QMAKE_CXX.LIBDIRS = \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0 \
+    D:/APP/Qt/Tools/mingw730_32/lib/gcc \
+    D:/APP/Qt/5.12.6/mingw73_32/lib \
+    D:/APP/Qt/Tools/mingw730_32/i686-w64-mingw32/lib \
+    D:/APP/Qt/Tools/mingw730_32/lib
