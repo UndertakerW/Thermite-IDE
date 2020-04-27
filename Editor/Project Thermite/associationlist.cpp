@@ -5,7 +5,6 @@
  */
 AssociationList::AssociationList(QWidget *parent): QListWidget(parent){
     p = (QPlainTextEdit *) parent;
-
     //Set the color
     toolbarColor.setRgb(248, 248, 248);    //Light Grey
     highlightColor.setRgb(248, 248, 248);  //Light Grey
@@ -19,6 +18,9 @@ AssociationList::AssociationList(QWidget *parent): QListWidget(parent){
     this->setFont(parent->font());
 }
 
+/*
+ * Dealing with key press
+ */
 void AssociationList::keyPressEvent(QKeyEvent *event){
     //When the focus is on the keyword association list
     //Call the keyPressEvent method of the superclass QListWidget when the key press is UP or DOWN

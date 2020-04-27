@@ -1,6 +1,5 @@
 #include "codeeditor.h"
 
-
 /*
  * The constructor of the editor object
  * The parameter parent is a QWidget pointer (to the parent object)
@@ -27,37 +26,28 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     /* Initialization */
 
     //Initialize the text box
-
     textFont = QFont("Courier", 12);
     textFont.setFixedPitch(true);
     this->setFont(textFont);
     parent->setFont(textFont);
-    //this->setFont(textFont);
-    setTabStopWidth(fontMetrics().width(QLatin1Char('0'))*2);
     highlighter = new Highlighter(this->document());
-
     placeLineNumberArea();
 
     //Set colors by RGB
     lineNumberColor.setRgb(192, 192, 192); //Silver
     backgroundColor.setRgb(255, 255, 255); //White
     textColor.setRgb(0, 0, 0);             //Black
-
     QPalette p = this->palette();
     p.setColor(QPalette::Active, QPalette::Base, backgroundColor);
     p.setColor(QPalette::Inactive, QPalette::Base, backgroundColor);
     p.setColor(QPalette::Text,textColor);
     this->setPalette(p);
 
-
-
     //Initialize the keyword association function
     initAssociationDict();
     associationList = new AssociationList(this);
     associationList->hide();
-    //associationList->setMaximumHeight(fontMetrics().height()*5);
     associationState = 2;
-
 }
 
 /*
@@ -85,7 +75,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
     }
 
     //Select the current option
-    else if(associationState == 1 && event->key()==Qt::Key_Return){
+    else if(associationState == 1 && (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)){
         QString insertText = associationList->currentItem()->text();
         QString word = this->getWordAtCursor();
 
@@ -127,69 +117,73 @@ void CodeEditor::keyPressEvent(QKeyEvent *event){
     }
 
     //Auto indentation
-    else if(event->key()==Qt::Key_Return){
+    else if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return){
 
-    //Get the text of the current line
-    QString line = this->document()->findBlockByLineNumber(this->textCursor().blockNumber()).text();
+        //Get the text of the current line
+        QString line = this->document()->findBlockByLineNumber(this->textCursor().blockNumber()).text();
 
-    //Call the keyPressEvent method of the superclass QPlainTextEdit
-    QPlainTextEdit::keyPressEvent(event);
+        //Call the keyPressEvent method of the superclass QPlainTextEdit
+        QPlainTextEdit::keyPressEvent(event);
 
-    //Do nothing if the current line is empty
-    if(line.count() == 0) return;
+        //Do nothing if the current line is empty
+        if(line.count() == 0) return;
 
-    //Output the indentation of the current line
-    int empty = 0;
-        for(QChar c : line){
-            if(c.isSpace()){
-                this->insertPlainText(QString(QChar::Space));
-                empty++;
+        //Output the indentation of the current line
+        int empty = 0;
+            for(QChar c : line){
+                if(c.isSpace()){
+                    this->insertPlainText(QString(QChar::Space));
+                    empty++;
+                }
+                else if (c == tr("\t")){
+                    this->insertPlainText(tr("    "));
+                    empty++;
+                }
+                else break;
             }
-            else if (c == tr("\t")){
-                this->insertPlainText(tr("  "));
-                empty++;
-            }
-            else break;
-        }
 
-    //Indentation increase
-    //The current line ends with ')'
-    QString lineContent = line.right(line.count()-empty);
-        if(line.at(line.count()-1)==')'){
-            if (lineContent.startsWith(tr("for(")) || lineContent.startsWith(tr("while(")) ||
-                    lineContent.startsWith(tr("switch(")) || lineContent.startsWith(tr("if("))){
+        //Indentation increase
+        //The current line ends with ')'
+        QString lineContent = line.right(line.count()-empty);
+            if(line.at(line.count()-1)==')'){
+                if (lineContent.startsWith(tr("for(")) || lineContent.startsWith(tr("while(")) ||
+                        lineContent.startsWith(tr("switch(")) || lineContent.startsWith(tr("if("))){
+                    for(QChar c : line){
+                        if(c.isSpace()){
+                            this->insertPlainText(QString(QChar::Space));
+                        }
+                        else if (c == tr("\t")){
+                            this->insertPlainText(tr("    "));
+                        }
+                        else break;
+                    }
+                    this->insertPlainText(tr("    "));
+                }
+            }
+        //The current line ends with '{'
+            if(line.at(line.count()-1) == '{'){
+                this->insertPlainText(tr("    "));
+                int pos = this->textCursor().position();
+                this->insertPlainText(tr("\n"));
                 for(QChar c : line){
                     if(c.isSpace()){
                         this->insertPlainText(QString(QChar::Space));
                     }
                     else if (c == tr("\t")){
-                        this->insertPlainText(tr("  "));
+                        this->insertPlainText(tr("    "));
                     }
                     else break;
                 }
-                this->insertPlainText(tr("  "));
+                this->insertPlainText(tr("}"));
+                QTextCursor cursor = this->textCursor();
+                cursor.setPosition(pos);
+                this->setTextCursor(cursor);
             }
-        }
-    //The current line ends with '{'
-        if(line.at(line.count()-1) == '{'){
-            this->insertPlainText(tr("  "));
-            int pos = this->textCursor().position();
-            this->insertPlainText(tr("\n"));
-            for(QChar c : line){
-                if(c.isSpace()){
-                    this->insertPlainText(QString(QChar::Space));
-                }
-                else if (c == tr("\t")){
-                    this->insertPlainText(tr("  "));
-                }
-                else break;
-            }
-            this->insertPlainText(tr("}"));
-            QTextCursor cursor = this->textCursor();
-            cursor.setPosition(pos);
-            this->setTextCursor(cursor);
-            }
-        }
+    }
+
+    else if (event->key() == Qt::Key_Tab){
+        this->insertPlainText(tr("    "));
+    }
 
     else if(event->key() == Qt::Key_Backspace){
 
@@ -386,6 +380,9 @@ QString CodeEditor::getWordAtCursor(){
     }
 }
 
+/*
+ * Display the association list when available
+ */
 void CodeEditor::displayAssociationList(){
     //Temporarily shut down the association widget to ignore changes of cursor and/or text
     //This prevents an infinite loop and mutual restraint

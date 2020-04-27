@@ -13,6 +13,7 @@
 #include "associationlist.h"
 #include "highlighter.h"
 #include <algorithm>
+
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
 class QResizeEvent;
@@ -20,6 +21,7 @@ class QSize;
 class QWidget;
 QT_END_NAMESPACE
 
+//Class Prototype
 class LineNumberArea;
 
 
@@ -28,11 +30,8 @@ class CodeEditor : public QPlainTextEdit{
 
 public:
     CodeEditor(QWidget *parent = nullptr);
-
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
-
-
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -40,13 +39,11 @@ protected:
     void initAssociationDict();
     void placeAssociationList();
 
-
 private slots:
     void placeLineNumberArea();
     void updateLineNumberArea(const QRect &, int);
     void updateAssociationList();
     void displayAssociationList();
-
 
 private:
     QWidget * lineNumberArea;
@@ -59,15 +56,12 @@ private:
     QString getWordAtCursor();
     int associationState; //Inactive = 0; Active = 1; Hidden = 2;
     Highlighter * highlighter;
-
 };
 
-
 class LineNumberArea : public QWidget{
+
 public:
-
     LineNumberArea(CodeEditor * editor);
-
     QSize sizeHint() const override;
 
 protected:
@@ -76,7 +70,6 @@ protected:
 
 private:
     CodeEditor *codeEditor;
-
 };
 
 

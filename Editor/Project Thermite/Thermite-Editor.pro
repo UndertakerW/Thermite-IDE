@@ -29,14 +29,14 @@ SOURCES += \
         mainwindow.cpp \
     codeeditor.cpp \
     highlighter.cpp \
-    console.cpp
+    terminal.cpp
 
 HEADERS += \
     associationlist.h \
         mainwindow.h \
     codeeditor.h \
     highlighter.h \
-    console.h
+    terminal.h
 
 FORMS += \
         mainwindow.ui
@@ -59,4 +59,5 @@ DISTFILES += \
     ICONS/SelectAll.png \
     ICONS/Settings.png \
     ICONS/Simulate.png \
-    ICONS/Undo.png
+    ICONS/Undo.png \
+    icons/SaveAs.png

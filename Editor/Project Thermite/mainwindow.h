@@ -7,12 +7,12 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QDebug>
+
 namespace Ui {
   class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow{
     Q_OBJECT
 
 public:
@@ -24,56 +24,65 @@ protected:
 
 private:
     QColor windowColor;
-  QIcon runIcon;
-  QIcon stopIcon;
-  Ui::MainWindow *ui;
-  QProcess process;
+    QFont textFont;
+    Ui::MainWindow *ui;
 
-  //File
-  QString fileName;
-  QString filePath;
-  bool fileSaved;
-  bool fileStatus;
+    //Status
+    bool startUp;
 
-  bool firstLoad;
+    //Process
+    QProcess processBuild;
+    QProcess processRun;
+    QProcess processAssemble;
+    QProcess processSimulate;
+    QProcess processReadme;
 
+    //File
+    QString fileName;
+    QString filePath;
+    bool fileSaved;
+    bool runState;
 
-  //Run
-  QString output;
-  QString error;
-
-  QFont textFont;
+    //Run
+    QString output;
+    QString error;
 
 public slots:
-  void changeSaveState(){
-    //qDebug()<<"changed";
-    if(firstLoad&&fileSaved){
-        this->setWindowTitle(tr("Project Thermite - ")+fileName);
-        firstLoad=false;
-        return;
-      }
-    fileSaved=false;
-    this->setWindowTitle(tr("Project Thermite - ")+fileName+tr("*"));
-  }
+    void changeSaveState();
 
-  //Toolbar
-  void newFile();
-  void saveFile();
-  void openFile();
-  void undo();
-  void redo();
-  void run();
+    //Toolbar
+    void newFile();
+    void saveFile();
+    void saveFileAs();
+    void openFile();
+    void undo();
+    void redo();
+    void copy();
+    void cut();
+    void paste();
+    void run();
+    void selectAll();
+    void about();
+    void readme();
 
+    /*
+    void settings();
+    void compile();
+    void assemble();
+    void simulate();
+    */
 
-  void runFinished(int code);
-  void updateOutput();
-  void updateError();
-  void about();
+    void runFinished();
+    void updateOutput();
+    void updateError();
+
 public:
-  void inputData(QString data);
+    void updateInput(QString data);
+    void updateWindowTitle();
+
 protected:
-  void resizeEvent(QResizeEvent* event)override;
-  void closeEvent(QCloseEvent* event)override;
+    void resizeEvent(QResizeEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

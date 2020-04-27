@@ -11,8 +11,7 @@ class QTextDocument;
 QT_END_NAMESPACE
 
 
-class Highlighter : public QSyntaxHighlighter
-{
+class Highlighter : public QSyntaxHighlighter{
     Q_OBJECT
 
 public:
@@ -23,13 +22,11 @@ protected:
     void initKeywordPatternsDict();
 
 private:
-
     QColor keywordColor;
     QColor functionColor;
     QColor classColor;
     QColor commentColor;
     QColor includeColor;
-
     QTextCharFormat keywordFormat;
     QTextCharFormat classFormat;
     QTextCharFormat singleLineCommentFormat;
@@ -37,14 +34,11 @@ private:
     QTextCharFormat includeFormat;
     QTextCharFormat functionFormat;
     QStringList keywordPatternsDict;
-
     struct HighlightRule{
         QRegularExpression pattern;
         QTextCharFormat format;
     };
-
     QVector<HighlightRule> HighlightRules;
-
 };
 
 

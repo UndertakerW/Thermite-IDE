@@ -9,14 +9,15 @@
 #include <vector>
 #include <string>
 #include <cmath>
+
 using std::string;
 using std::vector;
 using std::min;
+
 class AssociationList : public QListWidget{
 
 public:
     AssociationList(QWidget *parent);
-    static int ldistance(const string source, const string target);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

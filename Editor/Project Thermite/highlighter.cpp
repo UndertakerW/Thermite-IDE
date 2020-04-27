@@ -107,6 +107,9 @@ void Highlighter::highlightBlock(const QString &text){
     }
 }
 
+/*
+ * Initialize the keyword patterns dictionary
+ */
 void Highlighter::initKeywordPatternsDict(){
     std::ifstream in("KeywordPatternsDict.txt");
     std::string pattern;

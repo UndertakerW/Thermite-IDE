@@ -20,7 +20,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 #include <codeeditor.h>
-#include <console.h>
+#include <terminal.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -33,16 +33,20 @@ public:
     QAction *actionUndo;
     QAction *actionRedo;
     QAction *actionAbout;
-    QAction *actionDocument;
+    QAction *actionReadme;
     QAction *actionSaveFile;
     QAction *actionSetting;
     QAction *actionCompile;
     QAction *actionAssemble;
     QAction *actionSimulate;
     QAction *actionRun;
+    QAction *actionSaveAs;
+    QAction *actionCopy;
+    QAction *actionCut;
+    QAction *actionPaste;
     QWidget *centralWidget;
     CodeEditor *editor;
-    Console *outputText;
+    Terminal *terminal;
     QMenuBar *menuBar;
     QMenu *menu;
     QMenu *menuEdit;
@@ -104,12 +108,12 @@ public:
         icon6.addFile(QString::fromUtf8(":/ICONS/About.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionAbout->setIcon(icon6);
         actionAbout->setFont(font1);
-        actionDocument = new QAction(MainWindow);
-        actionDocument->setObjectName(QString::fromUtf8("actionDocument"));
+        actionReadme = new QAction(MainWindow);
+        actionReadme->setObjectName(QString::fromUtf8("actionReadme"));
         QIcon icon7;
         icon7.addFile(QString::fromUtf8(":/ICONS/Document.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionDocument->setIcon(icon7);
-        actionDocument->setFont(font1);
+        actionReadme->setIcon(icon7);
+        actionReadme->setFont(font1);
         actionSaveFile = new QAction(MainWindow);
         actionSaveFile->setObjectName(QString::fromUtf8("actionSaveFile"));
         QIcon icon8;
@@ -148,14 +152,34 @@ public:
         icon13.addFile(QString::fromUtf8(":/ICONS/Run.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionRun->setIcon(icon13);
         actionRun->setFont(font1);
+        actionSaveAs = new QAction(MainWindow);
+        actionSaveAs->setObjectName(QString::fromUtf8("actionSaveAs"));
+        QIcon icon14;
+        icon14.addFile(QString::fromUtf8(":/ICONS/SaveAs.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSaveAs->setIcon(icon14);
+        actionCopy = new QAction(MainWindow);
+        actionCopy->setObjectName(QString::fromUtf8("actionCopy"));
+        QIcon icon15;
+        icon15.addFile(QString::fromUtf8(":/ICONS/Copy.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionCopy->setIcon(icon15);
+        actionCut = new QAction(MainWindow);
+        actionCut->setObjectName(QString::fromUtf8("actionCut"));
+        QIcon icon16;
+        icon16.addFile(QString::fromUtf8(":/ICONS/Cut.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionCut->setIcon(icon16);
+        actionPaste = new QAction(MainWindow);
+        actionPaste->setObjectName(QString::fromUtf8("actionPaste"));
+        QIcon icon17;
+        icon17.addFile(QString::fromUtf8(":/ICONS/Paste.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionPaste->setIcon(icon17);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         editor = new CodeEditor(centralWidget);
         editor->setObjectName(QString::fromUtf8("editor"));
         editor->setGeometry(QRect(10, 0, 1251, 561));
-        outputText = new Console(centralWidget);
-        outputText->setObjectName(QString::fromUtf8("outputText"));
-        outputText->setGeometry(QRect(10, 570, 1251, 81));
+        terminal = new Terminal(centralWidget);
+        terminal->setObjectName(QString::fromUtf8("terminal"));
+        terminal->setGeometry(QRect(10, 570, 1251, 81));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -191,12 +215,16 @@ public:
         menu->addAction(actionNewFile);
         menu->addAction(actionOpen);
         menu->addAction(actionSaveFile);
-        menuEdit->addAction(actionSelectAll);
+        menu->addAction(actionSaveAs);
         menuEdit->addAction(actionUndo);
         menuEdit->addAction(actionRedo);
-        menuHelp->addAction(actionAbout);
-        menuHelp->addAction(actionDocument);
+        menuEdit->addAction(actionCopy);
+        menuEdit->addAction(actionCut);
+        menuEdit->addAction(actionPaste);
+        menuEdit->addAction(actionSelectAll);
         menuHelp->addAction(actionSetting);
+        menuHelp->addAction(actionAbout);
+        menuHelp->addAction(actionReadme);
         menuRun->addAction(actionCompile);
         menuRun->addAction(actionAssemble);
         menuRun->addAction(actionSimulate);
@@ -243,9 +271,9 @@ public:
 #ifndef QT_NO_TOOLTIP
         actionAbout->setToolTip(QApplication::translate("MainWindow", "About Project Thermite", nullptr));
 #endif // QT_NO_TOOLTIP
-        actionDocument->setText(QApplication::translate("MainWindow", "Readme", nullptr));
+        actionReadme->setText(QApplication::translate("MainWindow", "Readme", nullptr));
 #ifndef QT_NO_TOOLTIP
-        actionDocument->setToolTip(QApplication::translate("MainWindow", "View readme", nullptr));
+        actionReadme->setToolTip(QApplication::translate("MainWindow", "View readme", nullptr));
 #endif // QT_NO_TOOLTIP
         actionSaveFile->setText(QApplication::translate("MainWindow", "Save", nullptr));
 #ifndef QT_NO_TOOLTIP
@@ -276,6 +304,19 @@ public:
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_SHORTCUT
         actionRun->setShortcut(QApplication::translate("MainWindow", "Ctrl+R", nullptr));
+#endif // QT_NO_SHORTCUT
+        actionSaveAs->setText(QApplication::translate("MainWindow", "Save As", nullptr));
+        actionCopy->setText(QApplication::translate("MainWindow", "Copy", nullptr));
+#ifndef QT_NO_SHORTCUT
+        actionCopy->setShortcut(QApplication::translate("MainWindow", "Ctrl+C", nullptr));
+#endif // QT_NO_SHORTCUT
+        actionCut->setText(QApplication::translate("MainWindow", "Cut", nullptr));
+#ifndef QT_NO_SHORTCUT
+        actionCut->setShortcut(QApplication::translate("MainWindow", "Ctrl+X", nullptr));
+#endif // QT_NO_SHORTCUT
+        actionPaste->setText(QApplication::translate("MainWindow", "Paste", nullptr));
+#ifndef QT_NO_SHORTCUT
+        actionPaste->setShortcut(QApplication::translate("MainWindow", "Ctrl+V", nullptr));
 #endif // QT_NO_SHORTCUT
         menu->setTitle(QApplication::translate("MainWindow", "File", nullptr));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", nullptr));

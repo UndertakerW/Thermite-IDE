@@ -39,7 +39,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="Console" name="outputText">
+   <widget class="Terminal" name="terminal">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -80,6 +80,7 @@
     <addaction name="actionNewFile"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSaveFile"/>
+    <addaction name="actionSaveAs"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="font">
@@ -91,9 +92,12 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionSelectAll"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionSelectAll"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="font">
@@ -105,9 +109,9 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout"/>
-    <addaction name="actionDocument"/>
     <addaction name="actionSetting"/>
+    <addaction name="actionAbout"/>
+    <addaction name="actionReadme"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="font">
@@ -262,7 +266,7 @@
     </font>
    </property>
   </action>
-  <action name="actionDocument">
+  <action name="actionReadme">
    <property name="icon">
     <iconset resource="image.qrc">
      <normaloff>:/ICONS/Document.png</normaloff>:/ICONS/Document.png</iconset>
@@ -400,6 +404,51 @@
     <string>Ctrl+R</string>
    </property>
   </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset resource="image.qrc">
+     <normaloff>:/ICONS/SaveAs.png</normaloff>:/ICONS/SaveAs.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="image.qrc">
+     <normaloff>:/ICONS/Copy.png</normaloff>:/ICONS/Copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="image.qrc">
+     <normaloff>:/ICONS/Cut.png</normaloff>:/ICONS/Cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="image.qrc">
+     <normaloff>:/ICONS/Paste.png</normaloff>:/ICONS/Paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -409,9 +458,9 @@
    <header location="global">codeeditor.h</header>
   </customwidget>
   <customwidget>
-   <class>Console</class>
+   <class>Terminal</class>
    <extends>QPlainTextEdit</extends>
-   <header location="global">console.h</header>
+   <header location="global">terminal.h</header>
   </customwidget>
  </customwidgets>
  <resources>
