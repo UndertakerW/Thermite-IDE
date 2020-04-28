@@ -1,0 +1,11 @@
+release/associationlist.o
+release/codeeditor.o
+release/highlighter.o
+release/main.o
+release/mainwindow.o
+release/terminal.o
+release/qrc_image.o
+release/moc_codeeditor.o
+release/moc_highlighter.o
+release/moc_mainwindow.o
+release/moc_terminal.o

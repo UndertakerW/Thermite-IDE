@@ -1,0 +1,11 @@
+debug/associationlist.o
+debug/codeeditor.o
+debug/highlighter.o
+debug/main.o
+debug/mainwindow.o
+debug/terminal.o
+debug/qrc_image.o
+debug/moc_codeeditor.o
+debug/moc_highlighter.o
+debug/moc_mainwindow.o
+debug/moc_terminal.o
