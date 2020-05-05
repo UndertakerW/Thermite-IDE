@@ -864,14 +864,23 @@ int sentence_cin(string line){
     //not done yet!!!!!!!!!!!!!
     while(!cin_list.empty()){
         word=cin_list.front();
-        if(variabels_map[word]=="int")
+        string invari_reg=getReg(word);
+        if(variabels_map[word]=="int"){
             write("addi $v0, $zero, 5",a,false);
-        else if(variabels_map[word]=="double")
+            write("add "+invari_reg+", $zero, $v0",a,false);
+          }
+        else if(variabels_map[word]=="double"){
             write("addi $v0, $zero, 7",a,false);
-        else if(variabels_map[word]=="string")
+            write("add "+invari_reg+", $zero, $v0",a,false);
+          }
+        else if(variabels_map[word]=="string"){
             write("addi $v0, $zero, 8",a,false);
-        else if(variabels_map[word]=="char")
+            write("add "+invari_reg+", $zero, $v0",a,false);
+          }
+        else if(variabels_map[word]=="char"){
             write("addi $v0, $zero, 12",a,false);
+            write("add "+invari_reg+", $zero, $v0",a,false);
+          }
         write("syscall",a,false);
         cin_list.pop_front();
     }
