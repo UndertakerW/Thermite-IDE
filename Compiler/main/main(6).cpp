@@ -1678,7 +1678,9 @@ int main(){
            string sen=line;
            if (sen=="using namespace std;") break;
            sen.erase(0,sen.find_first_not_of(" "));
-           char *tokenPtr1=strtok(line," ");
+           char *tokenPtr3=strtok(line,"=");
+           char *tokenPtr2=strtok(tokenPtr3,"(");
+           char *tokenPtr1=strtok(tokenPtr2," ");
            char *tokenPtr=strtok(tokenPtr1,"<");
 
            scan_key(tokenPtr,sen);
