@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int line_number = 0;
+static int line_number = 0;
 
 map<string, string> variable_type;
 map<string, bool> variable;
@@ -1575,9 +1575,6 @@ void operation_sentence(string line, ostream & os) {
 }
 
 void variable_check(string f_path, string of_path) {
-    variable_type.clear();
-    variable.clear();
-    line_number = 0;
     fstream fp;
     fp.open(f_path, ios::in);
     ofstream ofp;
