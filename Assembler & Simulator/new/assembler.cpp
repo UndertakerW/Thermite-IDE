@@ -10,7 +10,8 @@
 #include <map>
 #include <sstream>
 #include "assembler.h"
-//#include "MIPSsimulator.h"
+//#include "simulator.h"
+
 using namespace std;
 
 static uint32_t SIM_BASE_ADDR = 0x400000;
