@@ -46,8 +46,6 @@ void int_sentence(string line, ostream & os) {
             }
         }
         else {
-            variable_type.clear();
-            variable.clear();
             string::size_type position3;
             position3 = line.find_last_of(")");
             line = line.substr(position2 + 1, position3 - position2 - 1);
@@ -161,8 +159,6 @@ void string_sentence(string line, ostream & os) {
             }
         }
         else {
-            variable_type.clear();
-            variable.clear();
             string::size_type position3;
             position3 = line.find_last_of(")");
             line = line.substr(position2 + 1, position3 - position2 - 1);
@@ -277,8 +273,6 @@ void char_sentence(string line, ostream & os) {
             }
         }
         else {
-            variable_type.clear();
-            variable.clear();
             string::size_type position3;
             position3 = line.find_last_of(")");
             line = line.substr(position2 + 1, position3 - position2 - 1);
@@ -393,8 +387,6 @@ void short_sentence(string line, ostream & os) {
             }
         }
         else {
-            variable_type.clear();
-            variable.clear();
             string::size_type position3;
             position3 = line.find_last_of(")");
             line = line.substr(position2 + 1, position3 - position2 - 1);
