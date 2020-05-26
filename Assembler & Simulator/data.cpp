@@ -1,225 +1,251 @@
-#include "data.h"
-#include "MIPS.h"
 #include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
+#include "data.h"
 
 using namespace std;
 
-/*
- * Load the static data to the memory
- * The source is a MIPS assembly language file
- */
-uint32_t * loadData(ifstream & source, uint32_t * data_addr){
-    //Build the data function map
-    typedef uint32_t * (*dataFunc)(string&, uint32_t *);
-    static map<string,dataFunc> dataFuncMap;
+int * asciiType(string data, int* pdata, bool ztype);
+int * wordType(string data, int * pdata);
+int * halfwordType(string data, int * pdata);
+int * floatType(string data, int * pdata);
+int * byteType(string data, int * pdata);
+int * doubleType(string data, int * pdata);
 
-    dataFuncMap.insert(make_pair(".word", wordData));
-    dataFuncMap.insert(make_pair(".byte", byteData));
-    dataFuncMap.insert(make_pair(".double", doubleData));
-    dataFuncMap.insert(make_pair(".float", floatData));
-    dataFuncMap.insert(make_pair(".half", halfwordData));
-    dataFuncMap.insert(make_pair(".ascii", asciiData));
-    dataFuncMap.insert(make_pair(".asciiz", asciizData));
+int* dataHandle(char* filename, int * pdata){
+    ifstream infile(filename);
 
-    //line = the original line
-    //name = name of the variable
-    //type = type of the data
-    //data = the data
-    string line;
-    string name;
-    string type;
+    // try to open the file
+    if(infile.fail()){
+        cout << "failed to open the file" << endl;
+        infile.close();
+        return pdata;
+    }
+
     string data;
-    uint32_t * data_ptr = data_addr;
+    string data2;
+    string cache;
 
-    int line_number = 0;
+    //jump to the .data
+    while(getline(infile, cache)){
+        stringstream cac;
+        string marker;
+        cac << cache;
+        cac >> marker;
 
-    //Indicate if there is a .data section
-    bool data_section = 0;
+        if(marker[0]=='.'){
+            break;
+        }
+    }
 
-    while (getline(source, line)){
-        line_number++;
-        trim(line);
+    while(infile>>data){
+        if(data[0]=='.'){
+            break;
+        }
 
-        //Data is between .data and .text
-        if (line.substr(0,5) == ".data") {
-            data_section = 1;
+        if(data[0]=='#'){
+            getline(infile, cache);
             continue;
         }
-        if (line.substr(0,5) == ".text") return data_ptr;
-        if (!data_section) continue;
-        if (line == "") continue;
 
-        //Find the name of the variable
-        unsigned colon = line.find(":");
-        if (colon < line.length()){
-            name = line.substr(0, colon);
-            line = line.substr(colon+1);
-            trim(line);
+        infile >> data;
+        getline(infile, cache);
+        stringstream dataflow;
+        dataflow << cache;
+        dataflow >> data2;
+
+        if(data==".asciiz"||data==".ascii"){
+            int start = 0;
+            int end = 0;
+            while(cache[start]!='\0'&&(cache[start]==' '||cache[start]=='\t')) start++;
+
+            // invalid
+            if(cache[start]!='"'||cache[start]=='\0'){
+                cout << "error in .data" << endl;
+                continue;
+            }
+            end = start+1;
+
+            while(cache[end]!='\0'&&cache[end]!='"') end++;
+            cache = cache.substr(start, end-start+1);
+
+            if(data==".asciiz") pdata = asciiType(cache, pdata, true);
+            else pdata = asciiType(cache, pdata, false);
+
         }
-        else cout << "Invalid data at line " << line_number << endl;
-
-        //Find the type of the data
-        unsigned space = line.find(' ');
-        if (space < line.length()){
-            type = line.substr(0, space);
-            line = line.substr(space+1);
-            trim(line);
+        else if(data==".word"){
+            pdata = wordType(data2, pdata);
         }
-        else cout << "Invalid data at line " << line_number << endl;
-
-        //Find the data
-        unsigned hash = line.find("#");
-        if (hash < line.length()){
-            line = line.substr(0, hash);
-            trim(line);
-            data = line;
+        else if(data==".byte"){
+            pdata = byteType(data2, pdata);
         }
-        data_ptr = dataFuncMap[type](data, data_ptr);
+        else if(data==".double"){
+            pdata = doubleType(data2,pdata);
+        }
+        else if(data==".float"){
+            pdata = floatType(data2, pdata);
+        }
+        else if(data==".half"){
+            pdata = halfwordType(data2, pdata);
+        }
+        else continue;
     }
-    return data_ptr;
+    infile.close();
+    return pdata;
 }
 
-/*
- * Deal with .ascii data
- */
-uint32_t * asciiData(string &data, uint32_t * data_ptr){
-    if(data[0]!='"' || data[data.length()-1]!='"'){
-        cout << "Missing quotation marks in the .data" << endl;
-        return data_ptr;
-    }
-    int len = data.length() - 2;
-    string temp = data.substr(1, len);
+int * asciiType(string data, int* pdata, bool ztype){ // ztype for Asciiz
+    string holder;
+    int lenOfWord = 0;
+    int leng = data.length();
 
-    char * char_ptr = (char *) data_ptr;
-    for (int i = 0; i < temp.length(); i++){
-        *char_ptr = temp[i];
-        char_ptr++;
+    if(data[0]!='"'){
+        cout << "error1 in the .data" << endl;
+        return pdata;
     }
 
-    //Align data_ptr to a multiple of 4
-    int word = len / 4;
-    int byte = len % 4;
-    if (byte) word++;
+    for(int i=1; i < leng; i++){
+        if(data[i]=='"') break;
+        lenOfWord++;
+    }
 
-    //If the string is empty
-    if(word == 0) word = 1;
+    holder = data.substr(1, lenOfWord);
 
-    return data_ptr + word;
+    char * pchar = (char *) pdata;
+    for(int i =0; i<lenOfWord; i++){
+        *pchar = holder[i];
+        pchar++;
+    }
+
+    if(ztype){
+        *pchar = '\0';
+        lenOfWord++;
+    }
+
+    int quotient = (lenOfWord)/4;
+    int reminder = (lenOfWord)%4;
+    if(reminder) quotient++;
+
+    // data = ""
+    if(quotient==0) quotient=1;
+    return pdata+quotient;
 }
 
-/*
- * Deal with .asciiz data
- * First, insert a '\0' at the end of the string
- * Then, handle it as a .ascii data
- */
-uint32_t * asciizData(string &data, uint32_t * data_ptr){
-    if(data[0]!='"' || data[data.length()-1]!='"'){
-        cout << "Missing quotation marks in the .data" << endl;
-        return data_ptr;
+
+int * wordType(string data, int * pdata){
+    int holder = 0;
+    int sign = 1;
+    for(int i = 0; data[i]!='\0';i++){
+        if(data[i]==','){
+            holder *= sign;
+            *pdata =holder;
+            pdata++;
+            holder = 0;
+            sign = 1;
+        }
+        else{
+            if(data[i]=='-') sign = -1;
+            else holder = holder*10 + (data[i]-'0');
+        }
     }
-    data = data.substr(0, data.length()-1) + '\0' + '"';
-    return asciiData(data, data_ptr);
+
+    //store the last number
+    holder *= sign;
+    *pdata = holder;
+    pdata++;
+    return pdata;
 }
 
-/*
- * Deal with .word data
- */
-uint32_t * wordData(string &data, uint32_t * data_ptr){
-    uint32_t * word_ptr = data_ptr;
-    vector<string> words = split(data, ",");
-    for (string word : words){
-        trim(word);
-        int num = stoi(word);
-        *word_ptr = num;
-        word_ptr++;
-    }
-    return data_ptr + words.size();
-}
-
-/*
- * Deal with .double data
- */
-uint32_t * doubleData(string &data, uint32_t * data_ptr){
+int * doubleType(string data, int * pdata){
     stringstream dataflow;
     double num;
     dataflow << data;
     dataflow >> num;
-    double * double_ptr = (double *) data_ptr;
-    *double_ptr = num;
-    return (data_ptr+2);
+    double * pdouble = (double *)  pdata;
+    *pdouble = num;
+    return (pdata+2);
 }
 
-/*
- * Deal with .float data
- */
-uint32_t * floatData(string &data, uint32_t * data_ptr){
+int * floatType(string data, int * pdata){
     stringstream dataflow;
     float num;
     dataflow << data;
     dataflow >> num;
-    float * float_ptr = (float *) data_ptr;
-    *float_ptr = num;
-    return ++data_ptr;
+    float * pdouble = (float *) pdata;
+    *pdouble = num;
+    return ++pdata;
 }
 
-/*
- * Deal with .byte data
- */
-uint32_t * byteData(string &data, uint32_t * data_ptr){
-    uint8_t * byte_ptr = (uint8_t *) data_ptr;
-    vector<string> bytes = split(data, ",");
-    for (string byte : bytes){
-        trim(byte);
-        if (isInt(byte)){
-            * byte_ptr = stoi(byte);
-        }
-        else if (byte.length() == 3){
-            * byte_ptr = byte[1];
-        }
-        byte_ptr++;
-    }
+int * byteType(string data, int * pdata){
+    char charholder = ' ';
+    int intholder = 0;
+    int count = 0;
+    char * pchar = (char*) (pdata);
+    int flag = 0;
 
-    //Align data_ptr to a multiple of 4
-    int word = bytes.size() / 4;
-    int byte = bytes.size() % 4;
-    if(byte) word++;
-
-    return data_ptr + word;
-}
-
-/*
- * Deal with .halfword data
- */
-uint32_t * halfwordData(string &data, uint32_t * data_ptr){
-    uint16_t * hw_ptr = (uint16_t *) data_ptr;
-    vector<string> halfwords = split(data, ",");
-    for (string halfword : halfwords){
-        trim(halfword);
-        if (isInt(halfword)){
-            * hw_ptr = stoi(halfword);
-        }
-        else if(data[0]!='"' || data[data.length()-1]!='"'){
-                cout << "Missing quotation marks in the .data" << endl;
-                return data_ptr;
+    for(int i = 0; data[i]!='\0';i++){
+        if(data[i]==','){
+            if(!flag) charholder=intholder;
+            *pchar = charholder;
+            pchar++;
+            count++;
+            intholder = 0;
+            flag = 0;
         }
         else{
-            char * byte_ptr = (char *) hw_ptr;
-            *byte_ptr = data[1];
-            if (data.length()==4){
-                *(byte_ptr + 1) = data[2];
+            if(data[i]=='\'') flag=1;
+            else{
+                if(flag) charholder=data[i];
+                else intholder = intholder*10 + (data[i]-'0');
             }
         }
-        hw_ptr++;
     }
 
-    //Align data_ptr to a multiple of 4
-    int word = halfwords.size() / 2;
-    int hw = halfwords.size() % 2;
-    if(hw) word++;
+    //store the last char
+    if(!flag) charholder=intholder;
+    *pchar = charholder;
+    count++;
 
-    return data_ptr + word;
+    int quotient = count/4;
+    int reminder = count%4;
+    if(reminder) quotient++;
+    return pdata+quotient;
+}
+
+int * halfwordType(string data, int * pdata){
+    char charholder = ' ';
+    int intholder = 0;
+    int count = 0;
+    uint16_t * pchar = (uint16_t *) (pdata);
+    int flag = 0;
+
+    for(int i = 0; data[i]!='\0';i++){
+        if(data[i]==','){
+            if(!flag) charholder=intholder;
+            *pchar = charholder;
+            pchar++;
+            count++;
+            intholder = 0;
+            flag = 0;
+        }
+        else{
+            if(data[i]=='\'') flag=1;
+            else{
+                if(flag) charholder=data[i];
+                else intholder = intholder*10 + (data[i]-'0');
+            }
+        }
+    }
+
+    //store the last char
+    if(!flag) charholder=intholder;
+    *pchar = charholder;
+    count++;
+
+    int quotient = count/2;
+    int reminder = count%2;
+    if(reminder) quotient++;
+    return pdata+quotient;
+
 }
