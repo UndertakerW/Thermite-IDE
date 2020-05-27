@@ -497,62 +497,28 @@ void cout_sentence(string line, ostream & os) {
         string::size_type position2;
         position2 = position1;
         if (position2 != line.npos) {
-            int length = line.size();
-            if (line[length - 1] != '<') {
-                position1 = line.find_first_of("<<", position2 + 2);
-                if (position1 == line.npos) {
-                    variable_name = line.substr(position2 + 2);
-                    variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    if (!variable_type.count(variable_name)) {
-                        os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                    }
-                    else if (!variable.count(variable_name)) {
-                        os << line_number << ", " << "no specified value for " << variable_name << endl;
-                    }
+            position1 = line.find_first_of("<<", position2 + 2);
+            if (position1 == line.npos) {
+                variable_name = line.substr(position2 + 2);
+                variable_name.erase(0, variable_name.find_first_not_of(" "));
+                if (!variable_type.count(variable_name)) {
+                    os << line_number << ", " << "undefined variable: " << variable_name << endl;
                 }
-                else {
-                    variable_name = line.substr(position2 + 2, position1 - position2 - 2);
-                    variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    string::size_type position3;
-                    position3 = variable_name.find_last_not_of(" ");
-                    variable_name = variable_name.substr(0, position3 + 1);
-                    if (!variable_type.count(variable_name)) {
-                        os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                    }
-                    else if (!variable.count(variable_name)) {
-                        os << line_number << ", " << "no specified value for " << variable_name << endl;
-                    }
+                else if (!variable.count(variable_name)) {
+                    os << line_number << ", " << "no specified value for " << variable_name << endl;
                 }
             }
-        }
-        else break;
-    }
-}
-
-void cin_sentence(string line) {
-    line = line.substr(3);
-    string::size_type position1;
-    string variable_name;
-    position1 = line.find_first_of(">>");
-    while (true) {
-        string::size_type position2;
-        position2 = position1;
-        if (position2 != line.npos) {
-            int length = line.size();
-            if (line[length - 1] != '>') {
-                position1 = line.find_first_of(">>", position2 + 2);
-                if (position1 == line.npos) {
-                    variable_name = line.substr(position2 + 2);
-                    variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    variable[variable_name] = true;
+            else {
+                variable_name = line.substr(position2 + 2, position1 - position2 - 2);
+                variable_name.erase(0, variable_name.find_first_not_of(" "));
+                string::size_type position3;
+                position3 = variable_name.find_last_not_of(" ");
+                variable_name = variable_name.substr(0, position3 + 1);
+                if (!variable_type.count(variable_name)) {
+                    os << line_number << ", " << "undefined variable: " << variable_name << endl;
                 }
-                else {
-                    variable_name = line.substr(position2 + 2, position1 - position2 - 2);
-                    variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    string::size_type position3;
-                    position3 = variable_name.find_last_not_of(" ");
-                    variable_name = variable_name.substr(0, position3 + 1);
-                    variable[variable_name] = true;
+                else if (!variable.count(variable_name)) {
+                    os << line_number << ", " << "no specified value for " << variable_name << endl;
                 }
             }
         }
@@ -1641,6 +1607,7 @@ void variable_check(string f_path, string of_path) {
         else if (line == "break") continue;
         else if (line == "continue") continue;
         else if (line[0] == '#') continue;
+        else if (line.substr(0, 3) == "cin") continue;
         else if (line.substr(0, 6) == "return") continue;
         else if (line.substr(0, 2) == "/*") continue;
         else if (line.substr(0, 2) == "*/") continue;
@@ -1666,7 +1633,6 @@ void variable_check(string f_path, string of_path) {
         else if (line.substr(0, 4) == "char") char_sentence(line, ofp);
         else if (line.substr(0, 5) == "short") short_sentence(line, ofp);
         else if (line.substr(0, 4) == "cout") cout_sentence(line, ofp);
-        else if (line.substr(0, 3) == "cin") cin_sentence(line);
         else if (line.substr(0, 2) == "if") if_sentence(line, ofp);
         else if (line.substr(0, 4) == "else") else_sentence(line, ofp);
         else if (line.substr(0, 5) == "while") while_sentence(line, ofp);

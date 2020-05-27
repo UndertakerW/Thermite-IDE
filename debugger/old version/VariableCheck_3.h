@@ -19,8 +19,6 @@ void if_sentence(string line, ostream & os);
 
 void cout_sentence(string line, ostream & os);
 
-void cin_sentence(string line);
-
 void short_sentence(string line, ostream & os);
 
 void char_sentence(string line, ostream & os);
