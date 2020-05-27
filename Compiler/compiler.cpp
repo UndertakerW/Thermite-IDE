@@ -638,6 +638,12 @@ int equation_split_key(string &line, list<string> &words,vector<int> &layers){
     string this_word="";
     int layer=0;
     int size=0;
+    string lline=line;
+    line="";
+    for(int i=0;i<<lline.length();i++){
+        if(lline.at(i)==' ')continue;
+        else line+=lline.at(i);
+    }
     searchline(line);
     for(int i=0;i<line.length();i++){
         if(line.at(i)==';') break;
