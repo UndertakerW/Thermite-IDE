@@ -759,7 +759,7 @@ void _SYSCALL(){
     }
     else if(pReg[2]==5){
         int num;
-        cout << "syscall: enter a num:";
+        cout << "syscall: enter a num: ";
         cin >> num;
         pReg[2] = num;
     }
