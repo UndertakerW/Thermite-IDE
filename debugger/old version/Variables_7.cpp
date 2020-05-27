@@ -1660,7 +1660,7 @@ void variable_check(string f_path, string of_path) {
         else if (line == "continue") continue;
         else if (line[0] == '#') continue;
         else if (line.substr(0, 6) == "return") continue;
-        else if (line[0] == '/') continue;
+        else if (line.substr(0, 2) == "/*") continue;
         else if (line.substr(0, 2) == "*/") continue;
         else if (line[0] == '*') continue;
         else if (line.find("//") != line.npos) {
