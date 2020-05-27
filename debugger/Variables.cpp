@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <fstream>
+#include "variables.h"
 
 using namespace std;
 
