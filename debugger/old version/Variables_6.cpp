@@ -548,12 +548,7 @@ void cin_sentence(string line, ostream & os) {
                 if (position1 == line.npos) {
                     variable_name = line.substr(position2 + 2);
                     variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    if (!variable_type.count(variable_name)) {
-                        os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                    }
-                    else {
-                        variable[variable_name] = true;
-                    }
+                    variable[variable_name] = true;
                 }
                 else {
                     variable_name = line.substr(position2 + 2, position1 - position2 - 2);
@@ -561,12 +556,7 @@ void cin_sentence(string line, ostream & os) {
                     string::size_type position3;
                     position3 = variable_name.find_last_not_of(" ");
                     variable_name = variable_name.substr(0, position3 + 1);
-                    if (!variable_type.count(variable_name)) {
-                        os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                    }
-                    else {
-                        variable[variable_name] = true;
-                    }
+                    variable[variable_name] = true;
                 }
             }
             else {
