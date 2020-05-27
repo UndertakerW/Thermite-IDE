@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <fstream>
+#include "variables.h"
 
 using namespace std;
 
@@ -524,16 +525,12 @@ void cout_sentence(string line, ostream & os) {
                     }
                 }
             }
-            else {
-                os << line_number << ", " << "cout not completed." << endl;
-                break;
-            }
         }
         else break;
     }
 }
 
-void cin_sentence(string line, ostream & os) {
+void cin_sentence(string line) {
     line = line.substr(3);
     string::size_type position1;
     string variable_name;
@@ -558,10 +555,6 @@ void cin_sentence(string line, ostream & os) {
                     variable_name = variable_name.substr(0, position3 + 1);
                     variable[variable_name] = true;
                 }
-            }
-            else {
-                os << line_number << ", " << "cout not completed." << endl;
-                break;
             }
         }
         else break;
@@ -1674,7 +1667,7 @@ void variable_check(string f_path, string of_path) {
         else if (line.substr(0, 4) == "char") char_sentence(line, ofp);
         else if (line.substr(0, 5) == "short") short_sentence(line, ofp);
         else if (line.substr(0, 4) == "cout") cout_sentence(line, ofp);
-        else if (line.substr(0, 3) == "cin") cin_sentence(line, ofp);
+        else if (line.substr(0, 3) == "cin") cin_sentence(line);
         else if (line.substr(0, 2) == "if") if_sentence(line, ofp);
         else if (line.substr(0, 4) == "else") else_sentence(line, ofp);
         else if (line.substr(0, 5) == "while") while_sentence(line, ofp);
