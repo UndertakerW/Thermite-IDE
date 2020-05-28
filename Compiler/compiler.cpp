@@ -2057,9 +2057,7 @@ int scan_key(string firw, string line){
 }
 
 int compileCode(string f_path, string e_path){
-//    string m_path = "C:\\Users\\HP\\Desktop\\new10\\new8\\test.txt";
-//    string m_path = "C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.txt";
-    string m_path = "D:\\CSC3002\\project\\Compiler\\new8777\\new86\\new8\\test.txt";
+    string m_path = "tmp\\temp.txt";
     readFileFromPath(f_path);
     fstream fp;
     fp.open(m_path,ios::in);
@@ -2162,7 +2160,7 @@ int compileCode(string f_path, string e_path){
 
 }
 
-
+/*
 int main(){
 //    compileCode("C:\\Users\\HP\\Desktop\\new10\\new8\\test.cpp", "C:\\Users\\HP\\Desktop\\new10\\new8\\test.asm");
 //    compileCode("C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.cpp", "C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.asm");
@@ -2170,3 +2168,4 @@ int main(){
     cout << "code is compiled successfully" <<endl;
     return 0;
 }
+*/
