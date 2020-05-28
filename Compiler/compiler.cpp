@@ -2146,6 +2146,9 @@ int compileCode(string f_path, string e_path){
     }
     things_that_would_wrtie.insert(things_that_would_wrtie.begin(), ".data");
 
+    //clean the origin asm file
+    ofstream createFile(e_path, ios::out|ios::trunc);
+    createFile.close();
 
     fstream outp(e_path, ios::out);
     for(int i=0;i< things_that_would_wrtie.size();i++){
