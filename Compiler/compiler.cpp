@@ -48,7 +48,6 @@ vector<int>break_layer_num;
 
 list<string> for_iter_list;
 
-//new added
 //save the address of the string, char, short variables
 map<string, int> dataSecAdress;
 static int dataSecCount=0;
@@ -85,15 +84,27 @@ static int tsRegNum = 21;
 //register for function parameters
 const char* pReg[] = {"$k1", "$sp", "$a3"};
 
+static int regCounter=0;
+
 static std::map<std::string, std::string> regMap;
 
+static int init_address = 0x00500000;
+
 //static int rapointer=0x600000;
+
+//out data
+static int labelNO=0;
+static int counter=0;
+static int nnum=0;
+static int cons_value=0;
+static int for_counter=0;
+static int order_scan=0;
+static int funcount=0;
 
 int write(string MIPS,int &get_index,bool haslabel);
 
 int scan_key(string firw, string line);
 
-//end new added
 
 //1:all bracket has label after }
 //2:loop bracket has jump to label when detect }
@@ -121,6 +132,7 @@ list<string> function_stack_ret;
 list<string> function_stack_cal;
 list<int> return_list;
 list<string> for_iter_store;
+list<string> answer_poly;
 int adressAllocater(int leng);
 int arithmetic(string line);
 //string getReg(string var, bool cover=false, bool newcover=false){
@@ -375,7 +387,6 @@ string getReg(string var, bool cover=false, bool newcover = false){
 // only used when a function is created and it will used to get register for parameter
 // give parameter in, and give register out. that's all
 string getparareg(string var){
-    static int regCounter=0;
     regMap[var] = pReg[(regCounter++)%3];
     return pReg[(regCounter++)%3];
 }
@@ -406,7 +417,6 @@ string free_reg(string var){
 //if the label appear right behind the instruction while/for, and before the '{'
 //then put label into loop_name_manage, the write function will handle it.
 string label_generate(){
-    static int labelNO=0;
     stringstream aaa;
     aaa << labelNO;
     string a;
@@ -476,8 +486,7 @@ void delevel(){
 //then just assign the paramenter last to be true.
 //then it can handle to put the label at right place
 int write(string MIPS,int &get_index,bool haslabel){
-    static int counter=0;
-    //static int label_need=0;
+    //sltatic int label_need=0;
     things_that_would_wrtie.push_back(MIPS);
     if(haslabel){
         labels_manage.push_front(counter);
@@ -895,8 +904,6 @@ double do_ARthimetic(string a_1,string op, string a_2,string temp__result){
     }
 }
 
-list<string> answer_poly;
-
 string store2_do2(string *array, double *array_cor,int *indicator,int size,int nnum){
     stringstream mm;
     string name0;
@@ -975,7 +982,6 @@ string store_doing_Tree(string line){
     int size=equation_split_key(line,words,layers);
     string array[size];
     string sub_result;
-    static int nnum=0;
     stringstream mm;
     string name0;
     double array_cor[size];
@@ -994,7 +1000,6 @@ string store_doing_Tree(string line){
             alpha_indicate++;
     }
     if(single_indicate==0&&alpha_indicate==0){
-        static int cons_value=0;
         int a;
         stringstream qq;
         qq<<cons_value;
@@ -1349,7 +1354,6 @@ int sentence_while(string line){
 }
 
 int sentence_for(string line){
-    static int for_counter=0;
     int bracket_count=0;
     int end_bracket,begin_bracket;
     bracket_type.push_front(2);
@@ -1624,7 +1628,6 @@ int sentence_int(string line){
 }
 
 int adressAllocater(int leng){
-    static int init_address = 0x00500000;
     //to make sure the space is the multiple of 4
     int oldaddr = init_address;
     int extra_sapce = (leng%4) ? 1 : 0;
@@ -1993,12 +1996,10 @@ int read_main(){
 
 int scan_key(string firw, string line){
     string secw;
-    static int order_scan=0;
     if(order_scan==0){
         read_main();
         order_scan++;
     }
-    static int funcount=0;
     if(line[line.length()-1]==';'){
         line = line.substr(0, line.length()-1);
     }
@@ -2056,8 +2057,56 @@ int scan_key(string firw, string line){
     return 0;
 }
 
+void dataRefresh(){
+    variabels_map.clear();
+    word_of_sentence.clear();
+    things_that_would_wrtie.clear();
+    data_section.clear();
+    string_handle_para.clear();
+    label_break.clear();
+    break_index_write.clear();
+    break_layer_num.clear();
+    for_iter_list.clear();
+    dataSecAdress.clear();
+    dataSecCount=0;
+    regStatus.empty();
+    regChange.empty();
+    globalReg.clear();
+    reglevel=-1;
+    regCounter=0;
+    regMap.clear();
+    init_address = 0x00500000;
+    bracket_type.clear();
+    labels_manage.clear();
+    label_name_manage.clear();
+    loop_name_manage.clear();
+    function_name_manage.clear();
+    function_manage.clear();
+    function_label_back.clear();
+    function_par_and_type.clear();
+    loop_manage.clear();
+    function_work_on.clear();
+    function_stack_ret.clear();
+    function_stack_cal.clear();
+    return_list.clear();
+    for_iter_store.clear();
+    answer_poly.clear();
+
+    labelNO=0;
+    counter=0;
+    nnum=0;
+    cons_value=0;
+    for_counter=0;
+    order_scan=0;
+    funcount=0;
+
+}
+
 int compileCode(string f_path, string e_path){
+//    string m_path = "C:\\Users\\HP\\Desktop\\new10\\new8\\test.txt";
+//    string m_path = "C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.txt";
     string m_path = "tmp\\temp.txt";
+    dataRefresh();
     readFileFromPath(f_path);
     fstream fp;
     fp.open(m_path,ios::in);
@@ -2146,11 +2195,12 @@ int compileCode(string f_path, string e_path){
     }
     things_that_would_wrtie.insert(things_that_would_wrtie.begin(), ".data");
 
-    //clean the origin asm file
-    ofstream createFile(e_path, ios::out|ios::trunc);
-    createFile.close();
+    ofstream createFile_srt(e_path, ios::out|ios::trunc);
+    createFile_srt.close();
 
     fstream outp(e_path, ios::out);
+
+
     for(int i=0;i< things_that_would_wrtie.size();i++){
         outp << things_that_would_wrtie[i]<<endl;
     }
@@ -2168,6 +2218,7 @@ int main(){
 //    compileCode("C:\\Users\\HP\\Desktop\\new10\\new8\\test.cpp", "C:\\Users\\HP\\Desktop\\new10\\new8\\test.asm");
 //    compileCode("C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.cpp", "C:\\Users\\10514\\Desktop\\new8(6)\\new8\\test.asm");
     compileCode("D:\\CSC3002\\project\\Compiler\\new8777\\new86\\new8\\test.cpp", "D:\\CSC3002\\project\\Compiler\\new8777\\new86\\new8\\test.asm");
+    compileCode("D:\\CSC3002\\project\\Compiler\\new8777\\new86\\new8\\test.cpp", "D:\\CSC3002\\project\\Compiler\\new8777\\new86\\new8\\test2.asm");
     cout << "code is compiled successfully" <<endl;
     return 0;
 }
