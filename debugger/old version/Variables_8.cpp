@@ -13,7 +13,6 @@ map<string, string> variable_type;
 map<string, bool> variable;
 
 const set<char> operation = {'=', '+', '-', '*', '/', '%', '|', '&'};
-const set<char> bracket = {'(', ')', '{', '}'};
 
 bool AllisNum(string str) {
     int length = str.size();
@@ -1092,6 +1091,8 @@ void for_sentence(string line, ostream & os) {
     string statement2;
     statement1 = line.substr(0, position3);
     statement2 = line.substr(position3 + 1, position4 - position3 - 1);
+    statement2 = "while" + statement2;
+    while_sentence(statement2, os);
     string variable_name;
     string variable_value;
     if (statement1.substr(0, 3) == "int") {
@@ -1111,7 +1112,6 @@ void for_sentence(string line, ostream & os) {
             variable_value = statement1.substr(position5 + 1);
             variable_value.erase(0, variable_value.find_first_not_of(" "));
             if (AllisNum(variable_value)) {
-                variable_type[variable_name] = "int";
                 variable[variable_name] = true;
             }
             else {
@@ -1127,7 +1127,6 @@ void for_sentence(string line, ostream & os) {
                             os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            variable_type[variable_name] = "int";
                             variable[variable_name] = true;
                         }
                     }
@@ -1192,9 +1191,6 @@ void for_sentence(string line, ostream & os) {
             }
         }
     }
-    statement2.erase(0, statement2.find_first_not_of(" "));
-    statement2 = "while (" + statement2 + ")";
-    while_sentence(statement2, os);
 }
 
 void operation_sentence(string line, ostream & os) {
@@ -1470,30 +1466,6 @@ void operation_sentence(string line, ostream & os) {
                 string variable_name;
                 if (i == length2 - 1) {
                     variable_name = line.substr(operation_index[length2 - 1] + 1);
-                    string::size_type position;
-                    position = variable_name.find("(");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("(");
-                    }
-                    position = variable_name.find(")");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find(")");
-                    }
-                    position = variable_name.find("{");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("{");
-                    }
-                    position = variable_name.find("}");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("}");
-                    }
-                    string::size_type position2;
-                    position2 = variable_name.find_last_not_of(" ");
-                    variable_name = variable_name.substr(0, position2 + 1);
                     variable_name.erase(0, variable_name.find_first_not_of(" "));
                     if (!AllisNum(variable_name)) {
                         if (!variable_type.count(variable_name)) {
@@ -1516,31 +1488,10 @@ void operation_sentence(string line, ostream & os) {
                 }
                 else {
                     variable_name = line.substr(operation_index[i] + 1, operation_index[i + 1] - operation_index[i] - 1);
-                    string::size_type position;
-                    position = variable_name.find("(");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("(");
-                    }
-                    position = variable_name.find(")");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find(")");
-                    }
-                    position = variable_name.find("{");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("{");
-                    }
-                    position = variable_name.find("}");
-                    while (position != variable_name.npos) {
-                        variable_name.erase(position, 1);
-                        position = variable_name.find("}");
-                    }
-                    variable_name.erase(0, variable_name.find_first_not_of(" "));
                     string::size_type position2;
                     position2 = variable_name.find_last_not_of(" ");
                     variable_name = variable_name.substr(0, position2 + 1);
+                    variable_name.erase(0, variable_name.find_first_not_of(" "));
                     if (!AllisNum(variable_name)) {
                         if (!variable_type.count(variable_name)) {
                             os << line_number << ", " << "undefined variable: " << variable_name << endl;
@@ -1596,9 +1547,6 @@ void operation_sentence(string line, ostream & os) {
                                 }
                             }
                         }
-                    }
-                    else {
-                        variable[variable_name_1] = true;
                     }
                 }
                 else if (variable_type.find(variable_name_1)->second == "string") {
