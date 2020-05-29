@@ -1,5 +1,5 @@
-#ifndef VARIABLECHECK_H
-#define VARIABLECHECK_H
+#ifndef VARIABLE_H
+#define VARIABLE_H
 
 #include <string>
 
@@ -19,8 +19,6 @@ void if_sentence(string line, ostream & os);
 
 void cout_sentence(string line, ostream & os);
 
-void cin_sentence(string line, ostream & os);
-
 void short_sentence(string line, ostream & os);
 
 void char_sentence(string line, ostream & os);
@@ -31,4 +29,4 @@ void int_sentence(string line, ostream & os);
 
 bool AllisNum(string str);
 
-#endif // VARIABLECHECK_H
+#endif // VARIABLE_H
