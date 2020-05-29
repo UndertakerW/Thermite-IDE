@@ -916,10 +916,18 @@ string store2_do2(string *array, double *array_cor,int *indicator,int size,int n
                     indicator[i]=0;
                 }
             }
-            //cout<<"show info:"<<array[i]<<"show indi:"<<indicator[i]<<endl;
             if(array[i]=="*"||array[i]=="/"||array[i]=="%"){
-                if(array_cor[i-1]-array_cor[i]>0.5||array_cor[i+1]-array_cor[i]>0.5)
+                if(array_cor[i-1]-array_cor[i+1]>0.5){
+                    array_cor[i+1]+=0.3;
+                    array_cor[i]+=0.3;
                     continue;
+                }
+                    if(array_cor[i+1]-array_cor[i-1]>0.5){
+                        array_cor[i-1]+=0.3;
+                        array_cor[i]+=0.3;
+                        continue;
+                    }
+
                 if(indicator[i-1]!=1){
                 indicator[i-1]=1;
                 array_cor[i-1]+=0.3;
@@ -938,13 +946,20 @@ string store2_do2(string *array, double *array_cor,int *indicator,int size,int n
         for(int i=0;i<size;i++){
             if(equation__key.count(array[i])==0){
                 if(array_cor[i]==array_cor[i+1]&&array_cor[i]==array_cor[i+2]){
-
+                    nnum+=1;
                     mm<<nnum;
                     mm>>name0;
                     sub_result="value_of"+name0;
                     double change=do_ARthimetic(array[i],array[i+1],array[i+2],sub_result);
-                    array_cor[i]+=change;
+                    if(i==0) array_cor[i]=array_cor[i+3];
+                    else if(i==size-3) array_cor[i]=array_cor[i-1];
+                    else{
+                        if(array_cor[i-1]>array_cor[i+3]) array_cor[i]=array_cor[i-1];
+                        else array_cor[i]=array_cor[i+3];
+                    }
+
                     array[i]= "value_of"+name0;
+
                     if(i<size-3){
                     for(int j=i+1;j<size-2;j++){
                         array_cor[j]=array_cor[j+2];
@@ -958,11 +973,11 @@ string store2_do2(string *array, double *array_cor,int *indicator,int size,int n
         double array_cor2[size];
         int indicator2[size];
         for(int i=0;i<size;i++){
-            if(array_cor!=0){
-                array_cor2[i]=int(array_cor[i]);
-            }
-            else{
-                array_cor2[i]=0;
+
+            array_cor2[i]=0;
+            while(array_cor[i]>=1&&array_cor[i]<10){
+                array_cor2[i]++;
+                array_cor[i]-=1;
             }
             indicator2[i]=0;
         }
@@ -982,6 +997,7 @@ string store_doing_Tree(string line){
     int size=equation_split_key(line,words,layers);
     string array[size];
     string sub_result;
+//    static int nnum=0;
     stringstream mm;
     string name0;
     double array_cor[size];
@@ -1000,6 +1016,7 @@ string store_doing_Tree(string line){
             alpha_indicate++;
     }
     if(single_indicate==0&&alpha_indicate==0){
+//        static int cons_value=0;
         int a;
         stringstream qq;
         qq<<cons_value;
@@ -1018,7 +1035,7 @@ string store_doing_Tree(string line){
         array_cor[now_info]=layers.back();
         words.pop_back();
         layers.pop_back();
-    }
+    };
 
     for(int i=0;i<size;i++){
         if(equation__key.count(array[i])==0){
@@ -1103,10 +1120,14 @@ string store_doing_Tree(string line){
         int indicator2[size];
         for(int i=0;i<size;i++){
             array_cor2[i]=0;
+            while(array_cor[i]>=1){
+                array_cor2[i]++;
+                array_cor[i]--;
+            }
             indicator2[i]=0;
         }
         nnum++;
-        store2_do2(array,array_cor,indicator2,size,nnum);
+        store2_do2(array,array_cor2,indicator2,size,nnum);
     }
     string final_answer=answer_poly.front();
     answer_poly.pop_front();
