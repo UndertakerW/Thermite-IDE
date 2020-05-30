@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "semicolon.h"
 
 using namespace std;
 
