@@ -8,13 +8,12 @@
 using namespace std;
 
 int line_number = 0;
-int lineNumber = 0;
 
-map<string, int> parameter_number;
 map<string, string> variable_type;
 map<string, bool> variable;
 
 const set<char> operation = {'=', '+', '-', '*', '/', '%', '|', '&'};
+const set<char> bracket = {'(', ')', '{', '}'};
 
 bool AllisNum(string str) {
     int length = str.size();
@@ -572,7 +571,7 @@ void cin_sentence(string line, ostream & os) {
                 }
             }
             else {
-                os << line_number << ", " << "cin not completed." << endl;
+                os << line_number << ", " << "cout not completed." << endl;
                 break;
             }
         }
@@ -1482,6 +1481,16 @@ void operation_sentence(string line, ostream & os) {
                         variable_name.erase(position, 1);
                         position = variable_name.find(")");
                     }
+                    position = variable_name.find("{");
+                    while (position != variable_name.npos) {
+                        variable_name.erase(position, 1);
+                        position = variable_name.find("{");
+                    }
+                    position = variable_name.find("}");
+                    while (position != variable_name.npos) {
+                        variable_name.erase(position, 1);
+                        position = variable_name.find("}");
+                    }
                     string::size_type position2;
                     position2 = variable_name.find_last_not_of(" ");
                     variable_name = variable_name.substr(0, position2 + 1);
@@ -1517,6 +1526,16 @@ void operation_sentence(string line, ostream & os) {
                     while (position != variable_name.npos) {
                         variable_name.erase(position, 1);
                         position = variable_name.find(")");
+                    }
+                    position = variable_name.find("{");
+                    while (position != variable_name.npos) {
+                        variable_name.erase(position, 1);
+                        position = variable_name.find("{");
+                    }
+                    position = variable_name.find("}");
+                    while (position != variable_name.npos) {
+                        variable_name.erase(position, 1);
+                        position = variable_name.find("}");
                     }
                     variable_name.erase(0, variable_name.find_first_not_of(" "));
                     string::size_type position2;
@@ -1561,127 +1580,25 @@ void operation_sentence(string line, ostream & os) {
                         variable[variable_name_1] = true;
                     }
                     else if (variable_value.find("(") == variable_value.npos) {
-                        variable[variable_name_1] = true;
                         if (!variable_type.count(variable_value)) {
                             os << line_number << ", " << "undefined variable: " << variable_value << endl;
-                            variable.erase(variable_name_1);
                         }
                         else {
                             if (variable_type.find(variable_value)->second != "int") {
                                 os << line_number << ", " << "wrong type of " << variable_value << endl;
-                                variable.erase(variable_name_1);
                             }
                             else {
                                 if (!variable.count(variable_value)) {
                                     os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                    variable.erase(variable_name_1);
+                                }
+                                else {
+                                    variable[variable_name_1] = true;
                                 }
                             }
                         }
                     }
                     else {
-                        string::size_type position2;
-                        string::size_type position3;
-                        position2 = variable_value.find("(");
-                        position3 = variable_value.find(")");
-                        string function_name;
-                        function_name = variable_value.substr(0, position2);
-                        if (!parameter_number.count(function_name)) {
-                            os << line_number << ", " << "undefined function: " << function_name << endl;
-                        }
-                        else {
-                            string arguments;
-                            arguments = variable_value.substr(position2 + 1, position3 - position2 - 1);
-                            if (arguments == "") variable[variable_name_1] = true;
-                            else {
-                                string::size_type position4;
-                                position4 = arguments.find(",");
-                                string variable_name;
-                                if (position4 == arguments.npos) {
-                                    variable_name = arguments;
-                                    variable[variable_name_1] = true;
-                                    if (!AllisNum(variable_name)) {
-                                        if (!variable_type.count(variable_name)) {
-                                            os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                                            variable.erase(variable_name_1);
-                                        }
-                                        else {
-                                            if (!variable.count(variable_name)) {
-                                                os << line_number << ", " << "no specified value for " << variable_name << endl;
-                                                variable.erase(variable_name_1);
-                                            }
-                                        }
-                                    }
-                                }
-                                else {
-                                    string::size_type position5;
-                                    variable_name = arguments.substr(0, position4);
-                                    variable[variable_name_1] = true;
-                                    if (variable_name == "") {
-                                        os << line_number << ", " << "incorrect number of arguments for function: " << function_name << endl;
-                                        variable.erase(variable_name_1);
-                                    }
-                                    else if (!AllisNum(variable_name)) {
-                                        if (!variable_type.count(variable_name)) {
-                                            os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                                            variable.erase(variable_name_1);
-                                        }
-                                        else {
-                                            if (!variable.count(variable_name)) {
-                                                os << line_number << ", " << "no specified value for " << variable_name << endl;
-                                                variable.erase(variable_name_1);
-                                            }
-                                        }
-                                    }
-                                    while (true) {
-                                        position5 = position4;
-                                        position4 = arguments.find(",", position4 + 1);
-                                        if (position4 != arguments.npos) {
-                                            variable_name = arguments.substr(position5 + 1, position4 - position5 - 1);
-                                            variable_name.erase(0, variable_name.find_first_not_of(" "));
-                                            if (variable_name == "") {
-                                                os << line_number << ", " << "incorrect number of arguments for function: " << function_name << endl;
-                                                variable.erase(variable_name_1);
-                                            }
-                                            else if (!AllisNum(variable_name)) {
-                                                if (!variable_type.count(variable_name)) {
-                                                    os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                                                    variable.erase(variable_name_1);
-                                                }
-                                                else {
-                                                    if (!variable.count(variable_name)) {
-                                                        os << line_number << ", " << "no specified value for " << variable_name << endl;
-                                                        variable.erase(variable_name_1);
-                                                    }
-                                                }
-                                            }
-                                            position4 = arguments.find(",", position4 + 1);
-                                        }
-                                        else {
-                                            variable_name = arguments.substr(position5 + 1);
-                                            variable_name.erase(0, variable_name.find_first_not_of(" "));
-                                            if (variable_name == "") {
-                                                os << line_number << ", " << "incorrect number of arguments for function: " << function_name << endl;
-                                                variable.erase(variable_name_1);
-                                            }
-                                            else if (!AllisNum(variable_name)) {
-                                                if (!variable_type.count(variable_name)) {
-                                                    os << line_number << ", " << "undefined variable: " << variable_name << endl;
-                                                    variable.erase(variable_name_1);
-                                                }
-                                                else {
-                                                    if (!variable.count(variable_name)) {
-                                                        os << line_number << ", " << "no specified value for " << variable_name << endl;
-                                                        variable.erase(variable_name_1);
-                                                    }
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        variable[variable_name_1] = true;
                     }
                 }
                 else if (variable_type.find(variable_name_1)->second == "string") {
@@ -1828,177 +1745,4 @@ void variable_check(string f_path, string of_path) {
     }
     fp.close();
     ofp.close();
-}
-
-bool FunctionCheck(string f_path, string of_path) {
-    lineNumber = 0;
-    parameter_number.clear();
-    fstream fp;
-    fp.open(f_path, ios::in);
-    ofstream ofp;
-    ofp.open(of_path, ios::out);
-    string line;
-    while (getline(fp, line)) {
-        lineNumber += 1;
-        line.erase(0, line.find_first_not_of(" "));
-        string::size_type position1;
-        position1 = line.find_last_not_of(" ");
-        line = line.substr(0, position1 + 1);
-        if (line.substr(0, 2) == "/*") continue;
-        else if (line[0] == '*') continue;
-        else if (line.find("//") != line.npos) {
-            string::size_type position2;
-            position2 = line.find("//");
-            if (position2 == 0) continue;
-            else {
-                line = line.substr(0, position2);
-                string::size_type position3;
-                position3 = line.find_last_not_of(" ");
-                line = line.substr(0, position3 + 1);
-            }
-        }
-
-        if (line.substr(0, 3) == "int") {
-            line = line.substr(3);
-            line.erase(0, line.find_first_not_of(" "));
-            string function_name;
-            string::size_type position2;
-            position2 = line.find("=");
-            if (position2 == line.npos) {
-                string::size_type position3;
-                position3 = line.find("(");
-                if (position3 != line.npos) {
-                    function_name = line.substr(0, position3);
-                    string::size_type position4;
-                    position4 = line.find(")");
-                    line = line.substr(position3 + 1, position4 - position3 - 1);
-                    int number_of_parameter;
-                    if (line == "") number_of_parameter = 0;
-                    else number_of_parameter = 1;
-                    string::size_type position5;
-                    position5 = line.find(",");
-                    while (position5 != line.npos) {
-                        number_of_parameter += 1;
-                        position5 = line.find(",", position5 + 1);
-                    }
-                    parameter_number[function_name] = number_of_parameter;
-                }
-            }
-        }
-        else if (line.substr(0, 6) == "string") {
-            line = line.substr(6);
-            line.erase(0, line.find_first_not_of(" "));
-            string function_name;
-            string::size_type position2;
-            position2 = line.find("=");
-            if (position2 == line.npos) {
-                string::size_type position3;
-                position3 = line.find("(");
-                if (position3 != line.npos) {
-                    function_name = line.substr(0, position3);
-                    string::size_type position4;
-                    position4 = line.find(")");
-                    line = line.substr(position3 + 1, position4 - position3 - 1);
-                    int number_of_parameter;
-                    if (line == "") number_of_parameter = 0;
-                    else number_of_parameter = 1;
-                    string::size_type position5;
-                    position5 = line.find(",");
-                    while (position5 != line.npos) {
-                        number_of_parameter += 1;
-                        position5 = line.find(",", position5 + 1);
-                    }
-                    parameter_number[function_name] = number_of_parameter;
-                }
-            }
-        }
-        else if (line.substr(0, 4) == "char") {
-            line = line.substr(4);
-            line.erase(0, line.find_first_not_of(" "));
-            string function_name;
-            string::size_type position2;
-            position2 = line.find("=");
-            if (position2 == line.npos) {
-                string::size_type position3;
-                position3 = line.find("(");
-                if (position3 != line.npos) {
-                    function_name = line.substr(0, position3);
-                    string::size_type position4;
-                    position4 = line.find(")");
-                    line = line.substr(position3 + 1, position4 - position3 - 1);
-                    int number_of_parameter;
-                    if (line == "") number_of_parameter = 0;
-                    else number_of_parameter = 1;
-                    string::size_type position5;
-                    position5 = line.find(",");
-                    while (position5 != line.npos) {
-                        number_of_parameter += 1;
-                        position5 = line.find(",", position5 + 1);
-                    }
-                    parameter_number[function_name] = number_of_parameter;
-                }
-            }
-        }
-        else if (line.substr(0, 5) == "short") {
-            line = line.substr(5);
-            line.erase(0, line.find_first_not_of(" "));
-            string function_name;
-            string::size_type position2;
-            position2 = line.find("=");
-            if (position2 == line.npos) {
-                string::size_type position3;
-                position3 = line.find("(");
-                if (position3 != line.npos) {
-                    function_name = line.substr(0, position3);
-                    string::size_type position4;
-                    position4 = line.find(")");
-                    line = line.substr(position3 + 1, position4 - position3 - 1);
-                    int number_of_parameter;
-                    if (line == "") number_of_parameter = 0;
-                    else number_of_parameter = 1;
-                    string::size_type position5;
-                    position5 = line.find(",");
-                    while (position5 != line.npos) {
-                        number_of_parameter += 1;
-                        position5 = line.find(",", position5 + 1);
-                    }
-                    parameter_number[function_name] = number_of_parameter;
-                }
-            }
-        }
-        else {
-            if (!parameter_number.empty()) {
-                map<string, int>::iterator iter;
-                for (iter = parameter_number.begin(); iter != parameter_number.end(); iter++) {
-                    string function_name;
-                    function_name = iter->first;
-                    string::size_type position2;
-                    position2 = line.find(function_name);
-                    if (position2 != line.npos) {
-                        string::size_type position3;
-                        string::size_type position4;
-                        position3 = line.find("(", position2 + 1);
-                        position4 = line.find(")", position3 + 1);
-                        line = line.substr(position3 + 1, position4 - position3 - 1);
-                        int number_of_parameter;
-                        if (line == "") number_of_parameter = 0;
-                        else number_of_parameter = 1;
-                        string::size_type position5;
-                        position5 = line.find(",");
-                        while (position5 != line.npos) {
-                            number_of_parameter += 1;
-                            position5 = line.find(",", position5 + 1);
-                        }
-                        if (number_of_parameter != iter->second) {
-                            ofp << lineNumber << ", " << "incorrect number of arguments for function: " << function_name << endl;
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    fp.close();
-    ofp.close();
-    return true;
 }
