@@ -65,7 +65,7 @@ bool brackets_check(string f_path, string of_path) {
                     }
                     else if (LeftBracket.top() != '(') {
                         int number = BracketNumber.top();
-                        ofp << number << ", " << "no matching ')' for '('" << endl;
+                        ofp << number << ", " << "no matching '}' for '{'" << endl;
                         return false;
                     }
                     else {
@@ -80,7 +80,7 @@ bool brackets_check(string f_path, string of_path) {
                     }
                     else if (LeftBracket.top() != '{') {
                         int number = BracketNumber.top();
-                        ofp << number << ", " << "no matching '}' for '{'" << endl;
+                        ofp << number << ", " << "no matching ')' for '('" << endl;
                         return false;
                     }
                     else {
