@@ -122,28 +122,19 @@ void int_sentence(string line, ostream & os) {
                 variable[variable_name] = true;
             }
             else {
-                int length = variable_value.size();
-                if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                }
-                else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    if (!variable_type.count(variable_value)) {
-                        os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                    if (variable_type.find(variable_value)->second != "int") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (variable_type.find(variable_value)->second != "int") {
-                            os << line_number << ", " << "wrong type of " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (!variable.count(variable_value)) {
-                                os << line_number << ", " << "no specified value for " << variable_value << endl;
-                            }
-                            else {
-                                variable[variable_name] = true;
-                            }
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -247,27 +238,19 @@ void string_sentence(string line, ostream & os) {
                 variable[variable_name] = true;
             }
             else {
-                if (AllisNum(variable_value)) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                }
-                else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    if (!variable_type.count(variable_value)) {
-                        os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                    if (variable_type.find(variable_value)->second != "string") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (variable_type.find(variable_value)->second != "string") {
-                            os << line_number << ", " << "wrong type of " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (!variable.count(variable_value)) {
-                                os << line_number << ", " << "no specified value for " << variable_value << endl;
-                            }
-                            else {
-                                variable[variable_name] = true;
-                            }
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -367,31 +350,23 @@ void char_sentence(string line, ostream & os) {
             variable_value = line.substr(position1 + 1);
             variable_value.erase(0, variable_value.find_first_not_of(" "));
             int length = variable_value.size();
-            if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
+            if ((length == 3) && (!AllisNum(variable_value)) && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
                 variable[variable_name] = true;
             }
             else {
-                if (AllisNum(variable_value)) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                }
-                else if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    if (!variable_type.count(variable_value)) {
-                        os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                    if (variable_type.find(variable_value)->second != "char") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (variable_type.find(variable_value)->second != "char") {
-                            os << line_number << ", " << "wrong type of " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (!variable.count(variable_value)) {
-                                os << line_number << ", " << "no specified value for " << variable_value << endl;
-                            }
-                            else {
-                                variable[variable_name] = true;
-                            }
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -494,28 +469,19 @@ void short_sentence(string line, ostream & os) {
                 variable[variable_name] = true;
             }
             else {
-                int length = variable_value.size();
-                if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                }
-                else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    if (!variable_type.count(variable_value)) {
-                        os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                    if (variable_type.find(variable_value)->second != "short") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (variable_type.find(variable_value)->second != "short") {
-                            os << line_number << ", " << "wrong type of " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (!variable.count(variable_value)) {
-                                os << line_number << ", " << "no specified value for " << variable_value << endl;
-                            }
-                            else {
-                                variable[variable_name] = true;
-                            }
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -539,10 +505,7 @@ void cout_sentence(string line, ostream & os) {
                 if (position1 == line.npos) {
                     variable_name = line.substr(position2 + 2);
                     variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    if (variable_name == "") {
-                        os << line_number << ", " << "cout not completed." << endl;
-                    }
-                    else if (!variable_type.count(variable_name)) {
+                    if (!variable_type.count(variable_name)) {
                         os << line_number << ", " << "undefined variable: " << variable_name << endl;
                     }
                     else if (!variable.count(variable_name)) {
@@ -555,10 +518,7 @@ void cout_sentence(string line, ostream & os) {
                     string::size_type position3;
                     position3 = variable_name.find_last_not_of(" ");
                     variable_name = variable_name.substr(0, position3 + 1);
-                    if (variable_name == "") {
-                        os << line_number << ", " << "cout not completed." << endl;
-                    }
-                    else if (!variable_type.count(variable_name)) {
+                    if (!variable_type.count(variable_name)) {
                         os << line_number << ", " << "undefined variable: " << variable_name << endl;
                     }
                     else if (!variable.count(variable_name)) {
@@ -590,10 +550,7 @@ void cin_sentence(string line, ostream & os) {
                 if (position1 == line.npos) {
                     variable_name = line.substr(position2 + 2);
                     variable_name.erase(0, variable_name.find_first_not_of(" "));
-                    if (variable_name == "") {
-                        os << line_number << ", " << "cin not completed." << endl;
-                    }
-                    else if (!variable_type.count(variable_name)) {
+                    if (!variable_type.count(variable_name)) {
                         os << line_number << ", " << "undefined variable: " << variable_name << endl;
                     }
                     else {
@@ -606,10 +563,7 @@ void cin_sentence(string line, ostream & os) {
                     string::size_type position3;
                     position3 = variable_name.find_last_not_of(" ");
                     variable_name = variable_name.substr(0, position3 + 1);
-                    if (variable_name == "") {
-                        os << line_number << ", " << "cin not completed." << endl;
-                    }
-                    else if (!variable_type.count(variable_name)) {
+                    if (!variable_type.count(variable_name)) {
                         os << line_number << ", " << "undefined variable: " << variable_name << endl;
                     }
                     else {
@@ -1162,29 +1116,20 @@ void for_sentence(string line, ostream & os) {
                 variable[variable_name] = true;
             }
             else {
-                int length = variable_value.size();
-                if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                }
-                else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                    os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    if (!variable_type.count(variable_value)) {
-                        os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                    if (variable_type.find(variable_value)->second != "int") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (variable_type.find(variable_value)->second != "int") {
-                            os << line_number << ", " << "wrong type of " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (!variable.count(variable_value)) {
-                                os << line_number << ", " << "no specified value for " << variable_value << endl;
-                            }
-                            else {
-                                variable_type[variable_name] = "int";
-                                variable[variable_name] = true;
-                            }
+                            variable_type[variable_name] = "int";
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -1220,37 +1165,28 @@ void for_sentence(string line, ostream & os) {
             if (!variable_type.count(variable_name)) {
                 os << line_number << ", " << "undefined variable: " << variable_name << endl;
             }
-            else if (variable_type.find(variable_name)->second != "int") {
-                os << line_number << ", " << "wrong type of " << variable_name << endl;
+            else {
+                if (variable_type.find(variable_name)->second != "int") {
+                    os << line_number << ", " << "wrong type of " << variable_name << endl;
+                }
+            }
+            if (AllisNum(variable_value)) {
+                variable[variable_name] = true;
             }
             else {
-                if (AllisNum(variable_value)) {
-                    variable[variable_name] = true;
+                if (!variable_type.count(variable_value)) {
+                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
                 }
                 else {
-                    int length = variable_value.size();
-                    if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                        os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
-                    }
-                    else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                        os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name << endl;
+                    if (variable_type.find(variable_value)->second != "int") {
+                        os << line_number << ", " << "wrong type of " << variable_value << endl;
                     }
                     else {
-                        if (!variable_type.count(variable_value)) {
-                            os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                        if (!variable.count(variable_value)) {
+                            os << line_number << ", " << "no specified value for " << variable_value << endl;
                         }
                         else {
-                            if (variable_type.find(variable_value)->second != "int") {
-                                os << line_number << ", " << "wrong type of " << variable_value << endl;
-                            }
-                            else {
-                                if (!variable.count(variable_value)) {
-                                    os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                }
-                                else {
-                                    variable[variable_name] = true;
-                                }
-                            }
+                            variable[variable_name] = true;
                         }
                     }
                 }
@@ -1625,28 +1561,20 @@ void operation_sentence(string line, ostream & os) {
                         variable[variable_name_1] = true;
                     }
                     else if (variable_value.find("(") == variable_value.npos) {
-                        int length = variable_value.size();
-                        if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                            os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
-                        }
-                        else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                            os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
+                        variable[variable_name_1] = true;
+                        if (!variable_type.count(variable_value)) {
+                            os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                            variable.erase(variable_name_1);
                         }
                         else {
-                            if (!variable_type.count(variable_value)) {
-                                os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                            if (variable_type.find(variable_value)->second != "int") {
+                                os << line_number << ", " << "wrong type of " << variable_value << endl;
+                                variable.erase(variable_name_1);
                             }
                             else {
-                                if (variable_type.find(variable_value)->second != "int") {
-                                    os << line_number << ", " << "wrong type of " << variable_value << endl;
-                                }
-                                else {
-                                    if (!variable.count(variable_value)) {
-                                        os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                    }
-                                    else {
-                                        variable[variable_name_1] = true;
-                                    }
+                                if (!variable.count(variable_value)) {
+                                    os << line_number << ", " << "no specified value for " << variable_value << endl;
+                                    variable.erase(variable_name_1);
                                 }
                             }
                         }
@@ -1769,34 +1697,18 @@ void operation_sentence(string line, ostream & os) {
                             os << line_number << ", " << "undefined variable: " << variable_value << endl;
                         }
                         else {
-                            if (AllisNum(variable_value)) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
-                            }
-                            else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
+                            if (variable_type.find(variable_value)->second != "string") {
+                                os << line_number << ", " << "wrong type of " << variable_value << endl;
                             }
                             else {
-                                if (!variable_type.count(variable_value)) {
-                                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                                if (!variable.count(variable_value)) {
+                                    os << line_number << ", " << "no specified value for " << variable_value << endl;
                                 }
                                 else {
-                                    if (variable_type.find(variable_value)->second != "string") {
-                                        os << line_number << ", " << "wrong type of " << variable_value << endl;
-                                    }
-                                    else {
-                                        if (!variable.count(variable_value)) {
-                                            os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                        }
-                                        else {
-                                            variable[variable_name_1] = true;
-                                        }
-                                    }
+                                    variable[variable_name_1] = true;
                                 }
                             }
                         }
-                    }
-                    else {
-                        os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
                     }
                 }
                 else if (variable_type.find(variable_name_1)->second == "char") {
@@ -1812,34 +1724,18 @@ void operation_sentence(string line, ostream & os) {
                             os << line_number << ", " << "undefined variable: " << variable_value << endl;
                         }
                         else {
-                            if (AllisNum(variable_value)) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
-                            }
-                            else if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
+                            if (variable_type.find(variable_value)->second != "char") {
+                                os << line_number << ", " << "wrong type of " << variable_value << endl;
                             }
                             else {
-                                if (!variable_type.count(variable_value)) {
-                                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                                if (!variable.count(variable_value)) {
+                                    os << line_number << ", " << "no specified value for " << variable_value << endl;
                                 }
                                 else {
-                                    if (variable_type.find(variable_value)->second != "char") {
-                                        os << line_number << ", " << "wrong type of " << variable_value << endl;
-                                    }
-                                    else {
-                                        if (!variable.count(variable_value)) {
-                                            os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                        }
-                                        else {
-                                            variable[variable_name_1] = true;
-                                        }
-                                    }
+                                    variable[variable_name_1] = true;
                                 }
                             }
                         }
-                    }
-                    else {
-                        os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
                     }
                 }
                 else if (variable_type.find(variable_name_1)->second == "short") {
@@ -1854,35 +1750,18 @@ void operation_sentence(string line, ostream & os) {
                             os << line_number << ", " << "undefined variable: " << variable_value << endl;
                         }
                         else {
-                            int length = variable_value.size();
-                            if ((variable_value[0] == '"') && (variable_value[length - 1] == '"')) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
-                            }
-                            else if ((length == 3) && (!isalnum(variable_value[0])) && (!isalnum(variable_value[length - 1])) && (variable_value[0] != '_') && (variable_value[0] != '"') && (variable_value[length - 1] != '"')) {
-                                os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
+                            if (variable_type.find(variable_value)->second != "short") {
+                                os << line_number << ", " << "wrong type of " << variable_value << endl;
                             }
                             else {
-                                if (!variable_type.count(variable_value)) {
-                                    os << line_number << ", " << "undefined variable: " << variable_value << endl;
+                                if (!variable.count(variable_value)) {
+                                    os << line_number << ", " << "no specified value for " << variable_value << endl;
                                 }
                                 else {
-                                    if (variable_type.find(variable_value)->second != "short") {
-                                        os << line_number << ", " << "wrong type of " << variable_value << endl;
-                                    }
-                                    else {
-                                        if (!variable.count(variable_value)) {
-                                            os << line_number << ", " << "no specified value for " << variable_value << endl;
-                                        }
-                                        else {
-                                            variable[variable_name_1] = true;
-                                        }
-                                    }
+                                    variable[variable_name_1] = true;
                                 }
                             }
                         }
-                    }
-                    else {
-                        os << line_number << ", " << "can not assign " << variable_value << " to " << variable_name_1 << endl;
                     }
                 }
             }
